@@ -26,7 +26,7 @@
 #include "yukino.h"
 
 //****************************************************************************************************
-// Lógica
+// Logic
 //****************************************************************************************************
 
 #define MAX_PLAYERS 4
@@ -227,7 +227,7 @@ inline void MakeGrowAxisY(UINT8 player) {
 }
 
 //****************************************************************************************************
-// Entrada
+// Input
 //****************************************************************************************************
 
 void OnButtonDown(unsigned value) {
@@ -278,7 +278,7 @@ void OnKeyboardDown() {
 }
 
 //****************************************************************************************************
-// Relojes
+// Timers
 //****************************************************************************************************
 
 DECL_WITH_IRQ_ATTRIBUTE(OnTimer0);
@@ -323,29 +323,29 @@ void OnTimer3() {
 }
 
 //****************************************************************************************************
-// Inicio
+// Main entry:
 //****************************************************************************************************
 
 void Main() {
-	// Inicialización base:
+	// Initialize the system:
 	sys_init();
 	InitializeSystem();
 
-	// Inicializar la salida:
+	// Initialize the output:
 	TurnOnLCD();
 	Set8Led(0);
 
-	// Inicializar los datos:
+	// Initialize the data:
 	InitializeGame();
 
-	// Inicializar la entrada:
+	// Initialize the input:
 	SetOnKeyboardDown(OnKeyboardDown);
 	InitializeKeyboardInterrupts();
 	SetOnButtonDown(OnButtonDown);
 	SetOnButtonUp(OnButtonUp);
 	InitializeButtonsInterrupts();
 
-	// Inicializar los timers:
+	// Initialize the timers:
 	SimpleInitializeTimerInterrupts(TIMER_ID0, Players[0].speed, (unsigned)OnTimer0);
 	SimpleInitializeTimerInterrupts(TIMER_ID1, Players[1].speed, (unsigned)OnTimer1);
 	SimpleInitializeTimerInterrupts(TIMER_ID2, Players[2].speed, (unsigned)OnTimer2);

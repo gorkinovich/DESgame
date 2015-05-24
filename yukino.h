@@ -57,7 +57,7 @@ void AddInterruptMask(unsigned mask);
 void SetInterruptModeToIRQ();
 
 //------------------------------------------------------------
-// Relojes
+// Timers
 //------------------------------------------------------------
 
 #define TIMER_ID0 0
@@ -89,7 +89,7 @@ void ClearTimer4PendingInterrupt();
 void ClearTimer5PendingInterrupt();
 
 //------------------------------------------------------------
-// Botones
+// Buttons
 //------------------------------------------------------------
 
 #define BUTTON_LEFT  (0x1 << 6)
@@ -108,7 +108,7 @@ BOOL AnyButtonDown();
 BOOL IsButtonDown(unsigned mask);
 
 //------------------------------------------------------------
-// Teclado
+// Keyboard
 //------------------------------------------------------------
 
 #define KEY_SB01 (0x01 << 15)
@@ -154,7 +154,7 @@ char UpdateAndReadOneKey();
 char ImmediateReadOneKey();
 
 //------------------------------------------------------------
-// Led 8 segmentos
+// 8-segments led
 //------------------------------------------------------------
 
 void Initialize8Led();
@@ -204,8 +204,18 @@ void PutPixelLCD(UINT16 x, UINT16 y, UINT8 color);
 void FillLCD(UINT8 color);
 void ClearLCD();
 
+void DrawHorizontalLineLCD(UINT16 left, UINT16 right, UINT16 y, UINT8 color, UINT16 width);
+void DrawVerticalLineLCD(UINT16 x, UINT16 up, UINT16 down, UINT8 color, UINT16 width);
+void DrawVerticalLineLCD(UINT16 left, UINT16 up, UINT16 right, UINT16 down, UINT8 color, UINT16 width);
+void PutCharLCD(UINT16 x, UINT16 y, UINT8 color, char value);
+void PutStringLCD(UINT16 x, UINT16 y, UINT8 color, const char * value);
+INT32 PrintLCD(UINT16 x, UINT16 y, UINT8 color, const char * format, ...);
+void PutChar2LCD(UINT16 x, UINT16 y, UINT8 color, char value);
+void PutString2LCD(UINT16 x, UINT16 y, UINT8 color, const char * value);
+INT32 Print2LCD(UINT16 x, UINT16 y, UINT8 color, const char * format, ...);
+
 //------------------------------------------------------------
-// Inicialización
+// Initialization
 //------------------------------------------------------------
 
 void InitializeSystem ();

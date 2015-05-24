@@ -23,6 +23,8 @@
 #include "yukino.h"
 #include "44b.h"
 #include "44blib.h"
+#include <stdarg.h>
+#include <stdio.h>
 
 //****************************************************************************************************
 // General
@@ -64,7 +66,7 @@ void SetInterruptModeToIRQ() {
 }
 
 //****************************************************************************************************
-// Relojes
+// Timers
 //****************************************************************************************************
 
 // (Páginas 234-253, S3C44B0X RISC MICROPROCESSOR, PWM TIMER)
@@ -273,7 +275,7 @@ void ClearTimer4PendingInterrupt() { rI_ISPC = BIT_TIMER4; }
 void ClearTimer5PendingInterrupt() { rI_ISPC = BIT_TIMER5; }
 
 //****************************************************************************************************
-// Botones
+// Buttons
 //****************************************************************************************************
 
 static ButtonEventHandler OnButtonDown_ = NULLPTR;
@@ -354,7 +356,7 @@ BOOL IsButtonDown(unsigned mask) {
 }
 
 //****************************************************************************************************
-// Teclado
+// Keyboard
 //****************************************************************************************************
 
 #define KEYBOARD_BASE 0x06000000
@@ -542,7 +544,7 @@ char ImmediateReadOneKey() {
 }
 
 //****************************************************************************************************
-// Led 8 segmentos
+// 8-segments led
 //****************************************************************************************************
 
 #define SEGMENT_A 0x7F
@@ -682,6 +684,9 @@ void TurnOffRightLed() {
 // LCD
 //****************************************************************************************************
 
+#define FONT_WIDTH 8
+#define FONT_HEIGHT 16
+
 extern const uint8 font[256*16];
 
 #define LCD_BUFFER_FACTOR 8
@@ -697,6 +702,16 @@ static UINT32 ScreenBufferLCD[LCD_BUFFER_SIZE] __attribute__ ((section (".lcdbuf
 // Añadir en fichero de enlace (*.ld):
 // . = 0x0C300000;
 // .lcdbuffer : { *(.lcdbuffer) }
+
+//----------------------------------------------------------------------------------------------------
+
+inline UINT32 PixelToIndexLCD(UINT32 x, UINT32 y) {
+	return LCD_BUFFER_WLINE * y + x / LCD_BUFFER_FACTOR;
+}
+
+inline UINT16 PixelToOffsetLCD(UINT16 x) {
+	return (((LCD_BUFFER_FACTOR - 1) - (x % LCD_BUFFER_FACTOR)) * 4);
+}
 
 //----------------------------------------------------------------------------------------------------
 
@@ -735,7 +750,8 @@ void InitializeLCD() {
 //----------------------------------------------------------------------------------------------------
 
 BOOL IsOnLCD() {
-	return (rLCDCON1 & 0x00000001) != 0;
+	unsigned int value = rLCDCON1;
+	return (value & 0x00000001) != 0;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -753,18 +769,23 @@ void TurnOffLCD() {
 //----------------------------------------------------------------------------------------------------
 
 UINT8 GetPixelLCD(UINT16 x, UINT16 y) {
-	UINT32 aux = ScreenBufferLCD[LCD_BUFFER_WLINE * y + x / LCD_BUFFER_FACTOR];
-	return (aux >> (((LCD_BUFFER_FACTOR - 1) - (x % LCD_BUFFER_FACTOR)) * 4)) & 0x0F;
+	if (x < LCD_WIDTH && y < LCD_HEIGHT) {
+		UINT32 aux = ScreenBufferLCD[PixelToIndexLCD(x, y)];
+		return (aux >> PixelToOffsetLCD(x)) & 0x0F;
+	} else {
+		return 0xFF;
+	}
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void PutPixelLCD(UINT16 x, UINT16 y, UINT8 color) {
-	unsigned index = LCD_BUFFER_WLINE * y + x / LCD_BUFFER_FACTOR;
-	UINT32 aux = ScreenBufferLCD[index];
-	UINT16 offset = (((LCD_BUFFER_FACTOR - 1) - (x % LCD_BUFFER_FACTOR)) * 4);
-	aux = (aux & ~(0x0F << offset)) | ((color & 0x0F) << offset);
-	ScreenBufferLCD[index] = aux;
+	if (x < LCD_WIDTH && y < LCD_HEIGHT) {
+		UINT32 index = PixelToIndexLCD(x, y);
+		UINT32 aux = ScreenBufferLCD[index];
+		UINT16 offset = PixelToOffsetLCD(x);
+		ScreenBufferLCD[index] = (aux & ~(0x0F << offset)) | ((color & 0x0F) << offset);
+	}
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -784,8 +805,133 @@ void ClearLCD() {
 	FillLCD(LCD_COLOR_WHITE);
 }
 
+//----------------------------------------------------------------------------------------------------
+
+void DrawHorizontalLineLCD(UINT16 left, UINT16 right, UINT16 y, UINT8 color, UINT16 width) {
+	UINT16 row, col, end = y + width;
+	for(row = y; row < end; ++row) {
+		for(col = left; col <= right; ++col) {
+			PutPixelLCD(col, row, color);
+		}
+	}
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawVerticalLineLCD(UINT16 x, UINT16 up, UINT16 down, UINT8 color, UINT16 width) {
+	UINT16 row, col, end = x + width;
+	for(row = up; row <= down; ++row) {
+		for(col = x; col < end; ++col) {
+			PutPixelLCD(col, row, color);
+		}
+	}
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawVerticalLineLCD(UINT16 left, UINT16 up, UINT16 right, UINT16 down, UINT8 color, UINT16 width) {
+	DrawHorizontalLineLCD(left, right, up, color, width);
+	DrawVerticalLineLCD(left, up, down, color, width);
+	DrawVerticalLineLCD(right, up, down, color, width);
+	DrawHorizontalLineLCD(left, right, down, color, width);
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void PutCharLCD(UINT16 x, UINT16 y, UINT8 color, char value) {
+	UINT16 row, col;
+	for (row = 0; row < FONT_HEIGHT; ++row) {
+		UINT8 mask = font[value * FONT_HEIGHT + row];
+		for (col = 0; col < FONT_WIDTH; ++col) {
+			if (mask & (0x80 >> col)) {
+				PutPixelLCD(x + col, y + row, color);
+			} else {
+				PutPixelLCD(x + col, y + row, LCD_COLOR_WHITE);
+			}
+		}
+	}
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void PutStringLCD(UINT16 x, UINT16 y, UINT8 color, const char * value) {
+	char c;
+	UINT16 i = 0, dx = x, dy = y;
+	while (c = value[i]) {
+		if (c == '\n') {
+			dx = x, dy += FONT_HEIGHT;
+		} else {
+			PutCharLCD(dx, dy, color, c);
+			dx += FONT_WIDTH;
+		}
+		++i;
+	}
+}
+
+//----------------------------------------------------------------------------------------------------
+
+INT32 PrintLCD(UINT16 x, UINT16 y, UINT8 color, const char * format, ...) {
+	va_list arg_params;
+	char buffer[512];
+	va_start(arg_params, format);
+	INT32 result = vsprintf(buffer, format, arg_params);
+	va_end(arg_params);
+	PutStringLCD(x, y, color, buffer);
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void PutChar2LCD(UINT16 x, UINT16 y, UINT8 color, char value) {
+	UINT16 row, col;
+	for (row = 0; row < FONT_HEIGHT; ++row) {
+		UINT8 mask = font[value * FONT_HEIGHT + row];
+		for (col = 0; col < FONT_WIDTH; ++col) {
+			if (mask & (0x80 >> col)) {
+				PutPixelLCD(x + col * 2, y + row * 2, color);
+				PutPixelLCD(x + col * 2 + 1, y + row * 2, color);
+				PutPixelLCD(x + col * 2, y + row * 2 + 1, color);
+				PutPixelLCD(x + col * 2 + 1, y + row * 2 + 1, color);
+			} else {
+				PutPixelLCD(x + col * 2, y + row * 2, LCD_COLOR_WHITE);
+				PutPixelLCD(x + col * 2 + 1, y + row * 2, LCD_COLOR_WHITE);
+				PutPixelLCD(x + col * 2, y + row * 2 + 1, LCD_COLOR_WHITE);
+				PutPixelLCD(x + col * 2 + 1, y + row * 2 + 1, LCD_COLOR_WHITE);
+			}
+		}
+	}
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void PutString2LCD(UINT16 x, UINT16 y, UINT8 color, const char * value) {
+	char c;
+	UINT16 i = 0, dx = x, dy = y;
+	while (c = value[i]) {
+		if (c == '\n') {
+			dx = x, dy += (FONT_HEIGHT * 2);
+		} else {
+			PutChar2LCD(dx, dy, color, c);
+			dx += (FONT_WIDTH * 2);
+		}
+		++i;
+	}
+}
+
+//----------------------------------------------------------------------------------------------------
+
+INT32 Print2LCD(UINT16 x, UINT16 y, UINT8 color, const char * format, ...) {
+	va_list arg_params;
+	char buffer[512];
+	va_start(arg_params, format);
+	INT32 result = vsprintf(buffer, format, arg_params);
+	va_end(arg_params);
+	PutString2LCD(x, y, color, buffer);
+	return result;
+}
+
 //****************************************************************************************************
-// LCD
+// Initialization
 //****************************************************************************************************
 
 void InitializeSystem() {
