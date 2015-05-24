@@ -206,7 +206,7 @@ void ClearLCD();
 
 void DrawHorizontalLineLCD(UINT16 left, UINT16 right, UINT16 y, UINT8 color, UINT16 width);
 void DrawVerticalLineLCD(UINT16 x, UINT16 up, UINT16 down, UINT8 color, UINT16 width);
-void DrawVerticalLineLCD(UINT16 left, UINT16 up, UINT16 right, UINT16 down, UINT8 color, UINT16 width);
+void DrawBoxLineLCD(UINT16 left, UINT16 up, UINT16 right, UINT16 down, UINT8 color, UINT16 width);
 void PutCharLCD(UINT16 x, UINT16 y, UINT8 color, char value);
 void PutStringLCD(UINT16 x, UINT16 y, UINT8 color, const char * value);
 INT32 PrintLCD(UINT16 x, UINT16 y, UINT8 color, const char * format, ...);

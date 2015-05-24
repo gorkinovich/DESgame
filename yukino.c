@@ -829,7 +829,7 @@ void DrawVerticalLineLCD(UINT16 x, UINT16 up, UINT16 down, UINT8 color, UINT16 w
 
 //----------------------------------------------------------------------------------------------------
 
-void DrawVerticalLineLCD(UINT16 left, UINT16 up, UINT16 right, UINT16 down, UINT8 color, UINT16 width) {
+void DrawBoxLineLCD(UINT16 left, UINT16 up, UINT16 right, UINT16 down, UINT8 color, UINT16 width) {
 	DrawHorizontalLineLCD(left, right, up, color, width);
 	DrawVerticalLineLCD(left, up, down, color, width);
 	DrawVerticalLineLCD(right, up, down, color, width);
