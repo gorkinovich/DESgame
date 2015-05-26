@@ -164,14 +164,52 @@ void DrawWorlCell(UINT8 row, UINT8 col) {
 //----------------------------------------------------------------------------------------------------
 
 void DrawWorldPlayer1(UINT8 row, UINT8 col) {
+    static const UINT8 data[] = {
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_LG, CL_BL, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_BL, CL_LG, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_LG, CL_BL, CL_LG, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_LG, CL_BL, CL_LG, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_LG, CL_BL, CL_LG, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_LG, CL_BL, CL_LG, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_BL, CL_BL, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_LG, CL_BL, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_BL, CL_LG, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH
+    };
     //TODO: Complete this function...
+    DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
     //...
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void DrawWorldPlayer2(UINT8 row, UINT8 col) {
+    static const UINT8 data[] = {
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
+        CL_WH, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH
+    };
     //TODO: Complete this function...
+    DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
     //...
 }
 
