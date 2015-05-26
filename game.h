@@ -50,21 +50,25 @@ extern "C" {
 // Types
 //------------------------------------------------------------
 
-//TODO: Complete this struct...
+typedef struct {
+    BOOL alive;
+    UINT8 row, col;
+} Shoot;
+
 typedef struct {
     UINT8 direction;
     UINT8 row, col;
     UINT8 lives;
+    Shoot shoot;
 } Player;
-//...
 
-//TODO: Complete this struct...
 typedef struct {
     // General:
     UINT32 scores[MAX_SCORES];
     // Current game:
     UINT8 world[MAX_ROWS][MAX_COLS];
     Player players[MAX_PLAYERS];
+    UINT8 hostPlayer;
     UINT32 lastScore;
     BOOL victory;
 } GameData;
@@ -74,6 +78,9 @@ typedef struct {
 //------------------------------------------------------------
 
 void InitializeGame();
+char * IntToString(UINT32 value);
+char * IntToString3(UINT32 value);
+char * IntToString10(UINT32 value);
 
 //------------------------------------------------------------
 // Scores
@@ -81,8 +88,6 @@ void InitializeGame();
 
 void InitializeScores();
 void AddScore(UINT32 score);
-char * ScoreToString(UINT32 score);
-char * ScoreToString10(UINT32 score);
 void SaveScores();
 void LoadScores();
 
@@ -98,6 +103,7 @@ void DrawWorldSoldier1(UINT8 row, UINT8 col);
 void DrawWorldLife(UINT8 row, UINT8 col);
 void DrawWorldWall(UINT8 row, UINT8 col);
 void DrawWorldEmpty(UINT8 row, UINT8 col);
+void DrawWorldShoot(UINT8 row, UINT8 col);
 
 //------------------------------------------------------------
 // Game
@@ -105,8 +111,9 @@ void DrawWorldEmpty(UINT8 row, UINT8 col);
 
 void InitializeNewGame();
 void InitializePlayer(UINT8 player);
+void FindPlayerPosition(UINT8 player, UINT8 wid);
 void DrawGame();
-void DrawGameScore();
+void DrawGameScoreAndLives();
 void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data);
 void DrawGameSprite90(UINT16 x, UINT16 y, const UINT8 * data);
 void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data);

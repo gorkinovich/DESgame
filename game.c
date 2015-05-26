@@ -26,6 +26,28 @@
 #include <stdio.h>
 
 //****************************************************************************************************
+// Constants
+//****************************************************************************************************
+
+#define CELL_WIDTH 16
+#define CELL_HEIGHT 16
+
+#define W_EMPT 0x00
+#define W_PLA1 0x01
+#define W_PLA2 0x02
+#define W_PLA3 0x04
+#define W_PLA4 0x08
+#define W_SOL1 0x10
+#define W_SOL2 0x20
+#define W_LIFE 0x40
+#define W_WALL 0x80
+
+#define CL_WH LCD_COLOR_WHITE
+#define CL_LG LCD_COLOR_LIGHTGRAY
+#define CL_DG LCD_COLOR_DARKGRAY
+#define CL_BL LCD_COLOR_BLACK
+
+//****************************************************************************************************
 // Data
 //****************************************************************************************************
 
@@ -40,6 +62,32 @@ void InitializeGame() {
     InitializeScores();
     InitializeNewGame();
     //...
+    DrawGame();
+    //...
+}
+
+//----------------------------------------------------------------------------------------------------
+
+char * IntToString(UINT32 value) {
+    static char buffer[16];
+    sprintf(buffer, "%d", value);
+    return buffer;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+char * IntToString3(UINT32 value) {
+    static char buffer[16];
+    sprintf(buffer, "%3d", value);
+    return buffer;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+char * IntToString10(UINT32 value) {
+    static char buffer[16];
+    sprintf(buffer, "%10d", value);
+    return buffer;
 }
 
 //****************************************************************************************************
@@ -71,22 +119,6 @@ void AddScore(UINT32 score) {
 
 //----------------------------------------------------------------------------------------------------
 
-char * ScoreToString(UINT32 score) {
-    static char buffer[16];
-    sprintf(buffer, "%d", score);
-    return buffer;
-}
-
-//----------------------------------------------------------------------------------------------------
-
-char * ScoreToString10(UINT32 score) {
-    static char buffer[16];
-    sprintf(buffer, "%10d", score);
-    return buffer;
-}
-
-//----------------------------------------------------------------------------------------------------
-
 void SaveScores() {
     //TODO: Complete this function...
 }
@@ -100,26 +132,6 @@ void LoadScores() {
 //****************************************************************************************************
 // World
 //****************************************************************************************************
-
-#define CELL_WIDTH 16
-#define CELL_HEIGHT 16
-
-#define W_EMPT 0x00
-#define W_PLA1 0x01
-#define W_PLA2 0x02
-#define W_PLA3 0x04
-#define W_PLA4 0x08
-#define W_SOL1 0x10
-#define W_SOL2 0x20
-#define W_LIFE 0x40
-#define W_WALL 0x80
-
-#define CL_WH LCD_COLOR_WHITE
-#define CL_LG LCD_COLOR_LIGHTGRAY
-#define CL_DG LCD_COLOR_DARKGRAY
-#define CL_BL LCD_COLOR_BLACK
-
-//----------------------------------------------------------------------------------------------------
 
 void InitializeWorld() {
     static const UINT8 data[] = {
@@ -139,7 +151,7 @@ void InitializeWorld() {
         W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL,
         W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT
     };
-    INT8 i, j;
+    UINT8 i, j;
     UINT16 k = 0;
     for (i = 0; i < MAX_ROWS; ++i) {
         for (j = 0; j < MAX_COLS; ++j, ++k) {
@@ -306,27 +318,76 @@ void DrawWorldEmpty(UINT8 row, UINT8 col) {
     DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
 }
 
+//----------------------------------------------------------------------------------------------------
+
+void DrawWorldShoot(UINT8 row, UINT8 col) {
+    static const UINT8 data[] = {
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH
+    };
+    DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
+}
+
 //****************************************************************************************************
 // Game Logic
 //****************************************************************************************************
 
 void InitializeNewGame() {
-    //TODO: Complete this function...
     UINT8 i;
     InitializeWorld();
     for (i = 0; i < MAX_PLAYERS; ++i) {
         InitializePlayer(i);
     }
+    game_data.hostPlayer = PLAYER_ONE;
     game_data.lastScore = 0;
     game_data.victory = FALSE;
-    //...
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void InitializePlayer(UINT8 player) {
-    //TODO: Complete this function...
-	//...
+    if (player < MAX_PLAYERS) {
+        if (player == PLAYER_ONE) {
+            game_data.players[player].direction = DIR_EAST;
+            FindPlayerPosition(player, W_PLA1);
+        } else if (player == PLAYER_TWO) {
+            game_data.players[player].direction = DIR_WEST;
+            FindPlayerPosition(player, W_PLA2);
+        }
+        game_data.players[player].lives = MAX_LIVES;
+        game_data.players[player].shoot.alive = FALSE;
+        game_data.players[player].shoot.row = 0;
+        game_data.players[player].shoot.col = 0;
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void FindPlayerPosition(UINT8 player, UINT8 wid) {
+    UINT8 i, j;
+    for (i = 0; i < MAX_ROWS; ++i) {
+        for (j = 0; j < MAX_COLS; ++j) {
+            if (game_data.world[i][j] == wid) {
+                game_data.players[player].row = i;
+                game_data.players[player].col = j;
+                return;
+            }
+        }
+    }
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -339,13 +400,15 @@ void DrawGame() {
         }
     }
     PutStringLCD(0, 224, LCD_COLOR_BLACK, "Score:");
-    DrawGameScore();
+    PutStringLCD(240, 224, LCD_COLOR_BLACK, "Lives:");
+    DrawGameScoreAndLives();
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void DrawGameScore() {
-    PutStringLCD(240, 224, LCD_COLOR_BLACK, ScoreToString10(game_data.lastScore));
+void DrawGameScoreAndLives() {
+    PutStringLCD(56, 224, LCD_COLOR_BLACK, IntToString10(game_data.lastScore));
+    PutStringLCD(296, 224, LCD_COLOR_BLACK, IntToString3(game_data.players[0].lives));
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -447,7 +510,7 @@ void DrawGameOver() {
     } else {
         PutString2LCD(88, 32, LCD_COLOR_BLACK, "GAME OVER"); //9
     }
-    char * score = ScoreToString(game_data.lastScore);
+    char * score = IntToString(game_data.lastScore);
     UINT16 x = (LCD_WIDTH - (FONT_WIDTH * strlen(score))) / 2;
     PutStringLCD(64, 96, LCD_COLOR_BLACK, "This is your last score:"); //24
     PutStringLCD(x, 128, LCD_COLOR_BLACK, score);
@@ -477,7 +540,7 @@ void DrawScores() {
     for (i = 0; i < MAX_SCORES; ++i) {
         if (game_data.scores[i]) {
             PutStringLCD(132, 80 + i * FONT_HEIGHT, LCD_COLOR_BLACK,
-                ScoreToString10(game_data.scores[i]));
+                IntToString10(game_data.scores[i]));
         }
     }
 }
