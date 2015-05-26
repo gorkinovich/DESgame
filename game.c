@@ -185,15 +185,49 @@ void DrawWorldSoldier1(UINT8 row, UINT8 col) {
 //----------------------------------------------------------------------------------------------------
 
 void DrawWorldLife(UINT8 row, UINT8 col) {
-    //TODO: Complete this function...
-    //...
+    static const UINT8 data[] = {
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_DG, CL_DG, CL_DG, CL_WH, CL_WH, CL_WH, CL_DG, CL_DG, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH,
+        CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH,
+        CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH,
+        CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH
+    };
+    DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void DrawWorldWall(UINT8 row, UINT8 col) {
-    //TODO: Complete this function...
-    //...
+    static const UINT8 data[] = {
+        CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL,
+        CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG,
+        CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG,
+        CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG,
+        CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG,
+        CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG,
+        CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG,
+        CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL,
+        CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL,
+        CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL,
+        CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL,
+        CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL,
+        CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL,
+        CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL,
+        CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL,
+        CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL
+    };
+    DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
 }
 
 //----------------------------------------------------------------------------------------------------
