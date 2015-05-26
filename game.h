@@ -53,6 +53,13 @@ extern "C" {
 #define STATE_SCORES    4
 #define STATE_HELP      5
 
+#define ACTION_NONE  0
+#define ACTION_FIRE  1
+#define ACTION_NORTH 2
+#define ACTION_EAST  3
+#define ACTION_SOUTH 4
+#define ACTION_WEST  5
+
 //------------------------------------------------------------
 // Types
 //------------------------------------------------------------
@@ -76,6 +83,7 @@ typedef struct {
     // Current game:
     UINT8 world[MAX_ROWS][MAX_COLS];
     Player players[MAX_PLAYERS];
+    UINT8 lastAction;
     UINT8 hostPlayer;
     UINT32 lastScore;
     BOOL victory;
@@ -101,6 +109,12 @@ void DrawGameSprite270(UINT16 x, UINT16 y, const UINT8 * data);
 void DrawWorldPlayer(UINT8 row, UINT8 col, UINT8 player, const UINT8 * data);
 
 //------------------------------------------------------------
+// Communication
+//------------------------------------------------------------
+
+void SendStartSignal();
+
+//------------------------------------------------------------
 // States
 //------------------------------------------------------------
 
@@ -110,6 +124,8 @@ void GotoStateGame();
 void GotoStateGameOver();
 void GotoStateScores();
 void GotoStateHelp();
+void UpdateOnKeyboard(UINT32 keys);
+void UpdateOnTimer();
 
 //------------------------------------------------------------
 // Menus

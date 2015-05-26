@@ -60,6 +60,7 @@ GameData game_data;
 void InitializeGame() {
     InitializeScores();
     InitializeNewGame();
+    PlayerOneAsHost();
     GotoStateMenu();
 }
 
@@ -71,6 +72,7 @@ void InitializeNewGame() {
     for (i = 0; i < MAX_PLAYERS; ++i) {
         InitializePlayer(i);
     }
+    game_data.lastAction = ACTION_NONE;
     game_data.lastScore = 0;
     game_data.victory = FALSE;
 }
@@ -211,20 +213,33 @@ void DrawWorldPlayer(UINT8 row, UINT8 col, UINT8 player, const UINT8 * data) {
 }
 
 //****************************************************************************************************
+// Communication
+//****************************************************************************************************
+
+void SendStartSignal() {
+    //TODO: Complete this function...
+    //...
+}
+
+//****************************************************************************************************
 // States
 //****************************************************************************************************
 
 void GotoStateMenu() {
     game_data.state = STATE_MENU;
-    PlayerOneAsHost();
     DrawMenu();
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void GotoStateNewGame() {
-    game_data.state = STATE_NEW_GAME;
-    DrawNewGame();
+    if (game_data.hostPlayer == PLAYER_ONE) {
+        game_data.state = STATE_NEW_GAME;
+        DrawNewGame();
+    } else {
+        SendStartSignal();
+        GotoStateGame();
+    }
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -241,6 +256,7 @@ void GotoStateGameOver() {
     game_data.state = STATE_GAME_OVER;
     game_data.victory = game_data.players[game_data.hostPlayer].lives > 0;
     if (game_data.victory) { AddScore(game_data.lastScore); }
+    PlayerOneAsHost();
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -255,6 +271,51 @@ void GotoStateScores() {
 void GotoStateHelp() {
     game_data.state = STATE_HELP;
     DrawHelp();
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void UpdateOnKeyboard(UINT32 keys) {
+    if (game_data.state == STATE_GAME) {
+        if (keys & KEY_SB06) {
+            game_data.lastAction = ACTION_FIRE;
+        } else if (keys & KEY_SB05) {
+            game_data.lastAction = ACTION_NORTH;
+        } else if (keys & KEY_SB07) {
+            game_data.lastAction = ACTION_SOUTH;
+        } else if (keys & KEY_SB02) {
+            game_data.lastAction = ACTION_WEST;
+        } else if (keys & KEY_SB10) {
+            game_data.lastAction = ACTION_EAST;
+        }
+    } else if (game_data.state == STATE_MENU) {
+        if (keys & KEY_SB01) {
+            GotoStateNewGame();
+        } else if (keys & KEY_SB05) {
+            GotoStateScores();
+        } else if (keys & KEY_SB09) {
+            GotoStateHelp();
+        }
+    } else if (game_data.state == STATE_NEW_GAME) {
+        if (keys & KEY_SB16) {
+            GotoStateMenu();
+        }
+    } else if (game_data.state == STATE_GAME_OVER) {
+        GotoStateMenu();
+    } else if (game_data.state == STATE_SCORES) {
+        GotoStateMenu();
+    } else if (game_data.state == STATE_HELP) {
+        GotoStateMenu();
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void UpdateOnTimer() {
+    //TODO: Complete this function...
+    if (game_data.state == STATE_GAME) {
+    }
+	//...
 }
 
 //****************************************************************************************************
