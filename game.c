@@ -47,7 +47,7 @@ void InitializeGame() {
 //****************************************************************************************************
 
 void InitializeScores() {
-    UINT8 i;
+    INT8 i;
     for (i = 0; i < MAX_SCORES; ++i) {
         game_data.scores[i] = 0;
     }
@@ -57,7 +57,7 @@ void InitializeScores() {
 //----------------------------------------------------------------------------------------------------
 
 void AddScore(UINT32 score) {
-    UINT8 i, j;
+    INT8 i, j;
     for (i = 0; i < MAX_SCORES; ++i) {
         if (score > game_data.scores[i]) {
             for (j = MAX_SCORES - 1; j > i; --j) {
@@ -139,7 +139,8 @@ void InitializeWorld() {
         W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL,
         W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT
     };
-    UINT8 i, j, k = 0;
+    INT8 i, j;
+    UINT16 k = 0;
     for (i = 0; i < MAX_ROWS; ++i) {
         for (j = 0; j < MAX_COLS; ++j, ++k) {
             game_data.world[i][j] = data[k];
@@ -311,7 +312,11 @@ void DrawWorldEmpty(UINT8 row, UINT8 col) {
 
 void InitializeNewGame() {
     //TODO: Complete this function...
+    UINT8 i;
     InitializeWorld();
+    for (i = 0; i < MAX_PLAYERS; ++i) {
+        InitializePlayer(i);
+    }
     game_data.lastScore = 0;
     game_data.victory = FALSE;
     //...
@@ -321,7 +326,7 @@ void InitializeNewGame() {
 
 void InitializePlayer(UINT8 player) {
     //TODO: Complete this function...
-    //...
+	//...
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -346,7 +351,8 @@ void DrawGameScore() {
 //----------------------------------------------------------------------------------------------------
 
 void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data) {
-    UINT8 i, j, k = 0;
+    INT8 i, j;
+    UINT16 k = 0;
     for (i = 0; i < CELL_HEIGHT; ++i) {
         for (j = 0; j < CELL_WIDTH; ++j, ++k) {
             PutPixelLCD(x + j, y + i, data[k]);
@@ -357,7 +363,8 @@ void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data) {
 //----------------------------------------------------------------------------------------------------
 
 void DrawGameSprite90(UINT16 x, UINT16 y, const UINT8 * data) {
-    UINT8 i, j, k = 0;
+    INT8 i, j;
+    UINT16 k = 0;
     for (j = CELL_WIDTH - 1; j >= 0; --j) {
         for (i = 0; i < CELL_HEIGHT; ++i, ++k) {
             PutPixelLCD(x + j, y + i, data[k]);
@@ -368,7 +375,8 @@ void DrawGameSprite90(UINT16 x, UINT16 y, const UINT8 * data) {
 //----------------------------------------------------------------------------------------------------
 
 void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data) {
-    UINT8 i, j, k = 0;
+    INT8 i, j;
+    UINT16 k = 0;
     for (i = CELL_HEIGHT - 1; i >= 0; --i) {
         for (j = CELL_WIDTH - 1; j >= 0; --j, ++k) {
             PutPixelLCD(x + j, y + i, data[k]);
@@ -379,7 +387,8 @@ void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data) {
 //----------------------------------------------------------------------------------------------------
 
 void DrawGameSprite270(UINT16 x, UINT16 y, const UINT8 * data) {
-    UINT8 i, j, k = 0;
+    INT8 i, j;
+    UINT16 k = 0;
     for (j = 0; j < CELL_WIDTH; ++j) {
         for (i = CELL_HEIGHT - 1; i >= 0; --i, ++k) {
             PutPixelLCD(x + j, y + i, data[k]);
