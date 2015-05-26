@@ -34,10 +34,17 @@ extern "C" {
 //------------------------------------------------------------
 
 #define MAX_SCORES 8
-#define PLAYER_ONE 0
-#define PLAYER_TWO 1
 #define MAX_COLS 20
 #define MAX_ROWS 15
+#define MAX_PLAYERS 2
+#define PLAYER_ONE 0
+#define PLAYER_TWO 1
+#define MAX_LIVES 3
+
+#define DIR_NORTH 0
+#define DIR_EAST  1
+#define DIR_SOUTH 2
+#define DIR_WEST  3
 
 //------------------------------------------------------------
 // Types
@@ -45,10 +52,19 @@ extern "C" {
 
 //TODO: Complete this struct...
 typedef struct {
+    UINT8 direction;
+    UINT8 row, col;
+    UINT8 lives;
+} Player;
+//...
+
+//TODO: Complete this struct...
+typedef struct {
     // General:
     UINT32 scores[MAX_SCORES];
     // Current game:
     UINT8 world[MAX_ROWS][MAX_COLS];
+    Player players[MAX_PLAYERS];
     UINT32 lastScore;
     BOOL victory;
 } GameData;
@@ -88,12 +104,14 @@ void DrawWorldEmpty(UINT8 row, UINT8 col);
 //------------------------------------------------------------
 
 void InitializeNewGame();
+void InitializePlayer(UINT8 player);
 void DrawGame();
 void DrawGameScore();
 void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data);
 void DrawGameSprite90(UINT16 x, UINT16 y, const UINT8 * data);
 void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data);
 void DrawGameSprite270(UINT16 x, UINT16 y, const UINT8 * data);
+void DrawWorldPlayer(UINT8 row, UINT8 col, UINT8 player, const UINT8 * data);
 
 //------------------------------------------------------------
 // Menus

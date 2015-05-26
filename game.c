@@ -182,9 +182,7 @@ void DrawWorldPlayer1(UINT8 row, UINT8 col) {
         CL_WH, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_WH,
         CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH
     };
-    //TODO: Complete this function...
-    DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-    //...
+    DrawWorldPlayer(row, col, PLAYER_ONE, data);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -208,9 +206,7 @@ void DrawWorldPlayer2(UINT8 row, UINT8 col) {
         CL_WH, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_WH,
         CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH
     };
-    //TODO: Complete this function...
-    DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-    //...
+    DrawWorldPlayer(row, col, PLAYER_TWO, data);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -323,6 +319,13 @@ void InitializeNewGame() {
 
 //----------------------------------------------------------------------------------------------------
 
+void InitializePlayer(UINT8 player) {
+    //TODO: Complete this function...
+    //...
+}
+
+//----------------------------------------------------------------------------------------------------
+
 void DrawGame() {
     UINT8 i, j;
     for (i = 0; i < MAX_ROWS; ++i) {
@@ -343,7 +346,7 @@ void DrawGameScore() {
 //----------------------------------------------------------------------------------------------------
 
 void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data) {
-    UINT8 i, j, k;
+    UINT8 i, j, k = 0;
     for (i = 0; i < CELL_HEIGHT; ++i) {
         for (j = 0; j < CELL_WIDTH; ++j, ++k) {
             PutPixelLCD(x + j, y + i, data[k]);
@@ -354,7 +357,7 @@ void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data) {
 //----------------------------------------------------------------------------------------------------
 
 void DrawGameSprite90(UINT16 x, UINT16 y, const UINT8 * data) {
-    UINT8 i, j, k;
+    UINT8 i, j, k = 0;
     for (j = CELL_WIDTH - 1; j >= 0; --j) {
         for (i = 0; i < CELL_HEIGHT; ++i, ++k) {
             PutPixelLCD(x + j, y + i, data[k]);
@@ -365,7 +368,7 @@ void DrawGameSprite90(UINT16 x, UINT16 y, const UINT8 * data) {
 //----------------------------------------------------------------------------------------------------
 
 void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data) {
-    UINT8 i, j, k;
+    UINT8 i, j, k = 0;
     for (i = CELL_HEIGHT - 1; i >= 0; --i) {
         for (j = CELL_WIDTH - 1; j >= 0; --j, ++k) {
             PutPixelLCD(x + j, y + i, data[k]);
@@ -376,10 +379,31 @@ void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data) {
 //----------------------------------------------------------------------------------------------------
 
 void DrawGameSprite270(UINT16 x, UINT16 y, const UINT8 * data) {
-    UINT8 i, j, k;
+    UINT8 i, j, k = 0;
     for (j = 0; j < CELL_WIDTH; ++j) {
         for (i = CELL_HEIGHT - 1; i >= 0; --i, ++k) {
             PutPixelLCD(x + j, y + i, data[k]);
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawWorldPlayer(UINT8 row, UINT8 col, UINT8 player, const UINT8 * data) {
+    if (player < MAX_PLAYERS) {
+        switch (game_data.players[player].direction) {
+        case DIR_EAST:
+            DrawGameSprite90(col * CELL_WIDTH, row * CELL_HEIGHT, data);
+            break;
+        case DIR_SOUTH:
+            DrawGameSprite180(col * CELL_WIDTH, row * CELL_HEIGHT, data);
+            break;
+        case DIR_WEST:
+            DrawGameSprite270(col * CELL_WIDTH, row * CELL_HEIGHT, data);
+            break;
+        default:
+            DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
+            break;
         }
     }
 }
