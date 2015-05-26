@@ -24,11 +24,13 @@
 #include "44blib.h"
 #include "stdio.h"
 #include "yukino.h"
+#include "game.h"
 
 //****************************************************************************************************
 // Logic
 //****************************************************************************************************
 
+/*
 #define MAX_PLAYERS 4
 #define BODY_SIZE   10
 
@@ -321,6 +323,7 @@ void OnTimer3() {
 	GenericOnTimer(TIMER_ID3, 3);
 	ClearTimer3PendingInterrupt();
 }
+//*/
 
 //****************************************************************************************************
 // Main entry:
@@ -335,6 +338,7 @@ void Main() {
 	TurnOnLCD();
 	Set8Led(0);
 
+	/*
 	// Initialize the data:
 	InitializeGame();
 
@@ -350,6 +354,7 @@ void Main() {
 	SimpleInitializeTimerInterrupts(TIMER_ID1, Players[1].speed, (unsigned)OnTimer1);
 	SimpleInitializeTimerInterrupts(TIMER_ID2, Players[2].speed, (unsigned)OnTimer2);
 	SimpleInitializeTimerInterrupts(TIMER_ID3, Players[3].speed, (unsigned)OnTimer3);
+	//*/
 
 	while (1);
 }
