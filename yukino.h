@@ -74,9 +74,9 @@ void SetInterruptModeToIRQ();
 #define TIMER_DIV32 4
 
 void SimpleInitializeTimerInterrupts(UINT8 timer, unsigned milliseconds,
-		unsigned onEventFunction);
+        unsigned onEventFunction);
 void InitializeTimerInterrupts(UINT8 timer, UINT8 prescaler, UINT8 divider,
-		unsigned count, unsigned compare, unsigned onEventFunction);
+        unsigned count, unsigned compare, unsigned onEventFunction);
 
 void SimpleChangeTimerInterrupts(UINT8 timer, unsigned milliseconds);
 void ChangeTimerInterrupts(UINT8 timer, UINT8 prescaler, UINT8 divider, unsigned count);

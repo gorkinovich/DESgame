@@ -45,7 +45,7 @@ extern "C" {
 
 //TODO: Complete this struct...
 typedef struct {
-	// General:
+    // General:
     UINT32 scores[MAX_SCORES];
     // Current game:
     UINT8 world[MAX_ROWS][MAX_COLS];
