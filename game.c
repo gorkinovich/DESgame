@@ -408,7 +408,7 @@ void DrawGame() {
 
 void DrawGameScoreAndLives() {
     PutStringLCD(56, 224, LCD_COLOR_BLACK, IntToString10(game_data.lastScore));
-    PutStringLCD(296, 224, LCD_COLOR_BLACK, IntToString3(game_data.players[0].lives));
+    PutStringLCD(296, 224, LCD_COLOR_BLACK, IntToString3(game_data.players[game_data.hostPlayer].lives));
 }
 
 //----------------------------------------------------------------------------------------------------
