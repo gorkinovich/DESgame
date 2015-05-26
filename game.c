@@ -54,40 +54,295 @@
 GameData game_data;
 
 //****************************************************************************************************
-// General
+// Game
 //****************************************************************************************************
 
 void InitializeGame() {
-    //TODO: Complete this function...
     InitializeScores();
     InitializeNewGame();
-    //...
+    GotoStateMenu();
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void InitializeNewGame() {
+    UINT8 i;
+    InitializeWorld();
+    for (i = 0; i < MAX_PLAYERS; ++i) {
+        InitializePlayer(i);
+    }
+    game_data.lastScore = 0;
+    game_data.victory = FALSE;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void InitializePlayer(UINT8 player) {
+    if (player < MAX_PLAYERS) {
+        if (player == PLAYER_ONE) {
+            game_data.players[player].direction = DIR_EAST;
+            FindPlayerPosition(player, W_PLA1);
+        } else if (player == PLAYER_TWO) {
+            game_data.players[player].direction = DIR_WEST;
+            FindPlayerPosition(player, W_PLA2);
+        }
+        game_data.players[player].lives = MAX_LIVES;
+        game_data.players[player].shoot.alive = FALSE;
+        game_data.players[player].shoot.row = 0;
+        game_data.players[player].shoot.col = 0;
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void FindPlayerPosition(UINT8 player, UINT8 wid) {
+    UINT8 i, j;
+    for (i = 0; i < MAX_ROWS; ++i) {
+        for (j = 0; j < MAX_COLS; ++j) {
+            if (game_data.world[i][j] == wid) {
+                game_data.players[player].row = i;
+                game_data.players[player].col = j;
+                return;
+            }
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void PlayerOneAsHost() {
+    game_data.hostPlayer = PLAYER_ONE;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void PlayerTwoAsHost() {
+    game_data.hostPlayer = PLAYER_TWO;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawGame() {
+    UINT8 i, j;
+    for (i = 0; i < MAX_ROWS; ++i) {
+        for (j = 0; j < MAX_COLS; ++j) {
+            DrawWorlCell(i, j);
+        }
+    }
+    PutStringLCD(0, 224, LCD_COLOR_BLACK, "Score:");
+    PutStringLCD(240, 224, LCD_COLOR_BLACK, "Lives:");
+    DrawGameScoreAndLives();
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawGameScoreAndLives() {
+    PutStringLCD(56, 224, LCD_COLOR_BLACK, IntToString10(game_data.lastScore));
+    PutStringLCD(296, 224, LCD_COLOR_BLACK, IntToString3(game_data.players[game_data.hostPlayer].lives));
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data) {
+    INT8 i, j;
+    UINT16 k = 0;
+    for (i = 0; i < CELL_HEIGHT; ++i) {
+        for (j = 0; j < CELL_WIDTH; ++j, ++k) {
+            PutPixelLCD(x + j, y + i, data[k]);
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawGameSprite90(UINT16 x, UINT16 y, const UINT8 * data) {
+    INT8 i, j;
+    UINT16 k = 0;
+    for (j = CELL_WIDTH - 1; j >= 0; --j) {
+        for (i = 0; i < CELL_HEIGHT; ++i, ++k) {
+            PutPixelLCD(x + j, y + i, data[k]);
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data) {
+    INT8 i, j;
+    UINT16 k = 0;
+    for (i = CELL_HEIGHT - 1; i >= 0; --i) {
+        for (j = CELL_WIDTH - 1; j >= 0; --j, ++k) {
+            PutPixelLCD(x + j, y + i, data[k]);
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawGameSprite270(UINT16 x, UINT16 y, const UINT8 * data) {
+    INT8 i, j;
+    UINT16 k = 0;
+    for (j = 0; j < CELL_WIDTH; ++j) {
+        for (i = CELL_HEIGHT - 1; i >= 0; --i, ++k) {
+            PutPixelLCD(x + j, y + i, data[k]);
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawWorldPlayer(UINT8 row, UINT8 col, UINT8 player, const UINT8 * data) {
+    if (player < MAX_PLAYERS) {
+        switch (game_data.players[player].direction) {
+        case DIR_EAST:
+            DrawGameSprite90(col * CELL_WIDTH, row * CELL_HEIGHT, data);
+            break;
+        case DIR_SOUTH:
+            DrawGameSprite180(col * CELL_WIDTH, row * CELL_HEIGHT, data);
+            break;
+        case DIR_WEST:
+            DrawGameSprite270(col * CELL_WIDTH, row * CELL_HEIGHT, data);
+            break;
+        default:
+            DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
+            break;
+        }
+    }
+}
+
+//****************************************************************************************************
+// States
+//****************************************************************************************************
+
+void GotoStateMenu() {
+    game_data.state = STATE_MENU;
+    PlayerOneAsHost();
+    DrawMenu();
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void GotoStateNewGame() {
+    game_data.state = STATE_NEW_GAME;
+    DrawNewGame();
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void GotoStateGame() {
+    game_data.state = STATE_GAME;
+    InitializeNewGame();
     DrawGame();
-    //...
 }
 
 //----------------------------------------------------------------------------------------------------
 
-char * IntToString(UINT32 value) {
-    static char buffer[16];
-    sprintf(buffer, "%d", value);
-    return buffer;
+void GotoStateGameOver() {
+    game_data.state = STATE_GAME_OVER;
+    game_data.victory = game_data.players[game_data.hostPlayer].lives > 0;
+    if (game_data.victory) { AddScore(game_data.lastScore); }
 }
 
 //----------------------------------------------------------------------------------------------------
 
-char * IntToString3(UINT32 value) {
-    static char buffer[16];
-    sprintf(buffer, "%3d", value);
-    return buffer;
+void GotoStateScores() {
+    game_data.state = STATE_SCORES;
+    DrawScores();
 }
 
 //----------------------------------------------------------------------------------------------------
 
-char * IntToString10(UINT32 value) {
-    static char buffer[16];
-    sprintf(buffer, "%10d", value);
-    return buffer;
+void GotoStateHelp() {
+    game_data.state = STATE_HELP;
+    DrawHelp();
+}
+
+//****************************************************************************************************
+// Menus
+//****************************************************************************************************
+
+void DrawMenu() {
+    ClearLCD();
+    PutString2LCD(48, 32, LCD_COLOR_BLACK, "TANK COMMANDER"); //14
+    PutStringLCD(116, 96, LCD_COLOR_BLACK, "A) New Game"); //11
+    PutStringLCD(116, 128, LCD_COLOR_BLACK, "B) Scores"); //9
+    PutStringLCD(116, 160, LCD_COLOR_BLACK, "C) Help"); //7
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawNewGame() {
+    ClearLCD();
+    PutString2LCD(96, 32, LCD_COLOR_BLACK, "NEW GAME"); //8
+    PutStringLCD(84, 112, LCD_COLOR_BLACK, "Waiting player 2..."); //19
+    PutStringLCD(116, 192, LCD_COLOR_BLACK, "P) Cancel"); //9
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawGameOver() {
+    ClearLCD();
+    if (game_data.victory) {
+        PutString2LCD(96, 32, LCD_COLOR_BLACK, "VICTORY!"); //8
+    } else {
+        PutString2LCD(88, 32, LCD_COLOR_BLACK, "GAME OVER"); //9
+    }
+    char * score = IntToString(game_data.lastScore);
+    UINT16 x = (LCD_WIDTH - (FONT_WIDTH * strlen(score))) / 2;
+    PutStringLCD(64, 96, LCD_COLOR_BLACK, "This is your last score:"); //24
+    PutStringLCD(x, 128, LCD_COLOR_BLACK, score);
+    PutStringLCD(48, 192, LCD_COLOR_BLACK, "Press any key to continue..."); //28
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawScores() {
+    static const UINT8 MAX_LINES = 8;
+    static const char * lines[] = {
+        "1) ----------", //13
+        "2) ----------",
+        "3) ----------",
+        "4) ----------",
+        "5) ----------",
+        "6) ----------",
+        "7) ----------",
+        "8) ----------"
+    };
+    UINT8 i;
+    ClearLCD();
+    PutString2LCD(112, 32, LCD_COLOR_BLACK, "SCORES"); //6
+    for (i = 0; i < MAX_LINES; ++i) {
+        PutStringLCD(108, 80 + FONT_HEIGHT * i, LCD_COLOR_BLACK, lines[i]);
+    }
+    for (i = 0; i < MAX_SCORES; ++i) {
+        if (game_data.scores[i]) {
+            PutStringLCD(132, 80 + i * FONT_HEIGHT, LCD_COLOR_BLACK,
+                IntToString10(game_data.scores[i]));
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawHelp() {
+    static const UINT8 MAX_LINES = 9;
+    static const char * lines[] = {
+        "|----------|-----------------------|",
+        "| Keyboard | Move with the arrows: |",
+        "|  A B C D |                       |",
+        "|  E F G H |         UP:B          |",
+        "|  I J K L | LEFT:E        RIGHT:G |",
+        "|  M N O P |        DOWN:J         |",
+        "|----------|                       |",
+        "           | Fire with: F          |",
+        "           |-----------------------|"
+    };
+    UINT8 i;
+    ClearLCD();
+    PutString2LCD(128, 32, LCD_COLOR_BLACK, "HELP"); //4
+    for (i = 0; i < MAX_LINES; ++i) {
+        PutStringLCD(16, 80 + FONT_HEIGHT * i, LCD_COLOR_BLACK, lines[i]);
+    }
 }
 
 //****************************************************************************************************
@@ -343,227 +598,29 @@ void DrawWorldShoot(UINT8 row, UINT8 col) {
 }
 
 //****************************************************************************************************
-// Game Logic
+// Utility
 //****************************************************************************************************
 
-void InitializeNewGame() {
-    UINT8 i;
-    InitializeWorld();
-    for (i = 0; i < MAX_PLAYERS; ++i) {
-        InitializePlayer(i);
-    }
-    game_data.hostPlayer = PLAYER_ONE;
-    game_data.lastScore = 0;
-    game_data.victory = FALSE;
+char * IntToString(UINT32 value) {
+	return IntToStringWithFormat(value, "%d");
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void InitializePlayer(UINT8 player) {
-    if (player < MAX_PLAYERS) {
-        if (player == PLAYER_ONE) {
-            game_data.players[player].direction = DIR_EAST;
-            FindPlayerPosition(player, W_PLA1);
-        } else if (player == PLAYER_TWO) {
-            game_data.players[player].direction = DIR_WEST;
-            FindPlayerPosition(player, W_PLA2);
-        }
-        game_data.players[player].lives = MAX_LIVES;
-        game_data.players[player].shoot.alive = FALSE;
-        game_data.players[player].shoot.row = 0;
-        game_data.players[player].shoot.col = 0;
-    }
+char * IntToString3(UINT32 value) {
+	return IntToStringWithFormat(value, "%3d");
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void FindPlayerPosition(UINT8 player, UINT8 wid) {
-    UINT8 i, j;
-    for (i = 0; i < MAX_ROWS; ++i) {
-        for (j = 0; j < MAX_COLS; ++j) {
-            if (game_data.world[i][j] == wid) {
-                game_data.players[player].row = i;
-                game_data.players[player].col = j;
-                return;
-            }
-        }
-    }
+char * IntToString10(UINT32 value) {
+	return IntToStringWithFormat(value, "%10d");
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void DrawGame() {
-    UINT8 i, j;
-    for (i = 0; i < MAX_ROWS; ++i) {
-        for (j = 0; j < MAX_COLS; ++j) {
-            DrawWorlCell(i, j);
-        }
-    }
-    PutStringLCD(0, 224, LCD_COLOR_BLACK, "Score:");
-    PutStringLCD(240, 224, LCD_COLOR_BLACK, "Lives:");
-    DrawGameScoreAndLives();
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGameScoreAndLives() {
-    PutStringLCD(56, 224, LCD_COLOR_BLACK, IntToString10(game_data.lastScore));
-    PutStringLCD(296, 224, LCD_COLOR_BLACK, IntToString3(game_data.players[game_data.hostPlayer].lives));
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data) {
-    INT8 i, j;
-    UINT16 k = 0;
-    for (i = 0; i < CELL_HEIGHT; ++i) {
-        for (j = 0; j < CELL_WIDTH; ++j, ++k) {
-            PutPixelLCD(x + j, y + i, data[k]);
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGameSprite90(UINT16 x, UINT16 y, const UINT8 * data) {
-    INT8 i, j;
-    UINT16 k = 0;
-    for (j = CELL_WIDTH - 1; j >= 0; --j) {
-        for (i = 0; i < CELL_HEIGHT; ++i, ++k) {
-            PutPixelLCD(x + j, y + i, data[k]);
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data) {
-    INT8 i, j;
-    UINT16 k = 0;
-    for (i = CELL_HEIGHT - 1; i >= 0; --i) {
-        for (j = CELL_WIDTH - 1; j >= 0; --j, ++k) {
-            PutPixelLCD(x + j, y + i, data[k]);
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGameSprite270(UINT16 x, UINT16 y, const UINT8 * data) {
-    INT8 i, j;
-    UINT16 k = 0;
-    for (j = 0; j < CELL_WIDTH; ++j) {
-        for (i = CELL_HEIGHT - 1; i >= 0; --i, ++k) {
-            PutPixelLCD(x + j, y + i, data[k]);
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawWorldPlayer(UINT8 row, UINT8 col, UINT8 player, const UINT8 * data) {
-    if (player < MAX_PLAYERS) {
-        switch (game_data.players[player].direction) {
-        case DIR_EAST:
-            DrawGameSprite90(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-            break;
-        case DIR_SOUTH:
-            DrawGameSprite180(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-            break;
-        case DIR_WEST:
-            DrawGameSprite270(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-            break;
-        default:
-            DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-            break;
-        }
-    }
-}
-
-//****************************************************************************************************
-// Menus
-//****************************************************************************************************
-
-void DrawMenu() {
-    ClearLCD();
-    PutString2LCD(48, 32, LCD_COLOR_BLACK, "TANK COMMANDER"); //14
-    PutStringLCD(116, 96, LCD_COLOR_BLACK, "A) New Game"); //11
-    PutStringLCD(116, 128, LCD_COLOR_BLACK, "B) Scores"); //9
-    PutStringLCD(116, 160, LCD_COLOR_BLACK, "C) Help"); //7
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawNewGame() {
-    ClearLCD();
-    PutString2LCD(96, 32, LCD_COLOR_BLACK, "NEW GAME"); //8
-    PutStringLCD(84, 112, LCD_COLOR_BLACK, "Waiting player 2..."); //19
-    PutStringLCD(116, 192, LCD_COLOR_BLACK, "P) Cancel"); //9
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGameOver() {
-    ClearLCD();
-    if (game_data.victory) {
-        PutString2LCD(96, 32, LCD_COLOR_BLACK, "VICTORY!"); //8
-    } else {
-        PutString2LCD(88, 32, LCD_COLOR_BLACK, "GAME OVER"); //9
-    }
-    char * score = IntToString(game_data.lastScore);
-    UINT16 x = (LCD_WIDTH - (FONT_WIDTH * strlen(score))) / 2;
-    PutStringLCD(64, 96, LCD_COLOR_BLACK, "This is your last score:"); //24
-    PutStringLCD(x, 128, LCD_COLOR_BLACK, score);
-    PutStringLCD(48, 192, LCD_COLOR_BLACK, "Press any key to continue..."); //28
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawScores() {
-    static const UINT8 MAX_LINES = 8;
-    static const char * lines[] = {
-        "1) ----------", //13
-        "2) ----------",
-        "3) ----------",
-        "4) ----------",
-        "5) ----------",
-        "6) ----------",
-        "7) ----------",
-        "8) ----------"
-    };
-    UINT8 i;
-    ClearLCD();
-    PutString2LCD(112, 32, LCD_COLOR_BLACK, "SCORES"); //6
-    for (i = 0; i < MAX_LINES; ++i) {
-        PutStringLCD(108, 80 + FONT_HEIGHT * i, LCD_COLOR_BLACK, lines[i]);
-    }
-    for (i = 0; i < MAX_SCORES; ++i) {
-        if (game_data.scores[i]) {
-            PutStringLCD(132, 80 + i * FONT_HEIGHT, LCD_COLOR_BLACK,
-                IntToString10(game_data.scores[i]));
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawHelp() {
-    static const UINT8 MAX_LINES = 9;
-    static const char * lines[] = {
-        "|----------|-----------------------|",
-        "| Keyboard | Move with the arrows: |",
-        "|  A B C D |                       |",
-        "|  E F G H |         UP:B          |",
-        "|  I J K L | LEFT:E        RIGHT:G |",
-        "|  M N O P |        DOWN:J         |",
-        "|----------|                       |",
-        "           | Fire with: F          |",
-        "           |-----------------------|"
-    };
-    UINT8 i;
-    ClearLCD();
-    PutString2LCD(128, 32, LCD_COLOR_BLACK, "HELP"); //4
-    for (i = 0; i < MAX_LINES; ++i) {
-        PutStringLCD(16, 80 + FONT_HEIGHT * i, LCD_COLOR_BLACK, lines[i]);
-    }
+char * IntToStringWithFormat(UINT32 value, const char * format) {
+    static char buffer[16];
+    sprintf(buffer, format, value);
+    return buffer;
 }

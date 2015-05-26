@@ -46,6 +46,13 @@ extern "C" {
 #define DIR_SOUTH 2
 #define DIR_WEST  3
 
+#define STATE_MENU      0
+#define STATE_NEW_GAME  1
+#define STATE_GAME      2
+#define STATE_GAME_OVER 3
+#define STATE_SCORES    4
+#define STATE_HELP      5
+
 //------------------------------------------------------------
 // Types
 //------------------------------------------------------------
@@ -64,6 +71,7 @@ typedef struct {
 
 typedef struct {
     // General:
+    UINT8 state;
     UINT32 scores[MAX_SCORES];
     // Current game:
     UINT8 world[MAX_ROWS][MAX_COLS];
@@ -74,13 +82,44 @@ typedef struct {
 } GameData;
 
 //------------------------------------------------------------
-// General
+// Game
 //------------------------------------------------------------
 
 void InitializeGame();
-char * IntToString(UINT32 value);
-char * IntToString3(UINT32 value);
-char * IntToString10(UINT32 value);
+void InitializeNewGame();
+void InitializePlayer(UINT8 player);
+void FindPlayerPosition(UINT8 player, UINT8 wid);
+void PlayerOneAsHost();
+void PlayerTwoAsHost();
+
+void DrawGame();
+void DrawGameScoreAndLives();
+void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data);
+void DrawGameSprite90(UINT16 x, UINT16 y, const UINT8 * data);
+void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data);
+void DrawGameSprite270(UINT16 x, UINT16 y, const UINT8 * data);
+void DrawWorldPlayer(UINT8 row, UINT8 col, UINT8 player, const UINT8 * data);
+
+//------------------------------------------------------------
+// States
+//------------------------------------------------------------
+
+void GotoStateMenu();
+void GotoStateNewGame();
+void GotoStateGame();
+void GotoStateGameOver();
+void GotoStateScores();
+void GotoStateHelp();
+
+//------------------------------------------------------------
+// Menus
+//------------------------------------------------------------
+
+void DrawMenu();
+void DrawNewGame();
+void DrawGameOver();
+void DrawScores();
+void DrawHelp();
 
 //------------------------------------------------------------
 // Scores
@@ -106,29 +145,13 @@ void DrawWorldEmpty(UINT8 row, UINT8 col);
 void DrawWorldShoot(UINT8 row, UINT8 col);
 
 //------------------------------------------------------------
-// Game
+// Utility
 //------------------------------------------------------------
 
-void InitializeNewGame();
-void InitializePlayer(UINT8 player);
-void FindPlayerPosition(UINT8 player, UINT8 wid);
-void DrawGame();
-void DrawGameScoreAndLives();
-void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data);
-void DrawGameSprite90(UINT16 x, UINT16 y, const UINT8 * data);
-void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data);
-void DrawGameSprite270(UINT16 x, UINT16 y, const UINT8 * data);
-void DrawWorldPlayer(UINT8 row, UINT8 col, UINT8 player, const UINT8 * data);
-
-//------------------------------------------------------------
-// Menus
-//------------------------------------------------------------
-
-void DrawMenu();
-void DrawNewGame();
-void DrawGameOver();
-void DrawScores();
-void DrawHelp();
+char * IntToString(UINT32 value);
+char * IntToString3(UINT32 value);
+char * IntToString10(UINT32 value);
+char * IntToStringWithFormat(UINT32 value, const char * format);
 
 #ifdef __cplusplus
 }
