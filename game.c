@@ -351,6 +351,39 @@ void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data) {
     }
 }
 
+//----------------------------------------------------------------------------------------------------
+
+void DrawGameSprite90(UINT16 x, UINT16 y, const UINT8 * data) {
+    UINT8 i, j, k;
+    for (j = CELL_WIDTH - 1; j >= 0; --j) {
+        for (i = 0; i < CELL_HEIGHT; ++i, ++k) {
+            PutPixelLCD(x + j, y + i, data[k]);
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data) {
+    UINT8 i, j, k;
+    for (i = CELL_HEIGHT - 1; i >= 0; --i) {
+        for (j = CELL_WIDTH - 1; j >= 0; --j, ++k) {
+            PutPixelLCD(x + j, y + i, data[k]);
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawGameSprite270(UINT16 x, UINT16 y, const UINT8 * data) {
+    UINT8 i, j, k;
+    for (j = 0; j < CELL_WIDTH; ++j) {
+        for (i = CELL_HEIGHT - 1; i >= 0; --i, ++k) {
+            PutPixelLCD(x + j, y + i, data[k]);
+        }
+    }
+}
+
 //****************************************************************************************************
 // Menus
 //****************************************************************************************************

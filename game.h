@@ -91,6 +91,9 @@ void InitializeNewGame();
 void DrawGame();
 void DrawGameScore();
 void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data);
+void DrawGameSprite90(UINT16 x, UINT16 y, const UINT8 * data);
+void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data);
+void DrawGameSprite270(UINT16 x, UINT16 y, const UINT8 * data);
 
 //------------------------------------------------------------
 // Menus
