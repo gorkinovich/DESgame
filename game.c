@@ -38,6 +38,7 @@ GameData game_data;
 void InitializeGame() {
 	//TODO: Complete this function...
 	InitializeScores();
+    InitializeNewGame();
 	//...
 }
 
@@ -97,7 +98,172 @@ void LoadScores() {
 }
 
 //****************************************************************************************************
-// Render
+// World
+//****************************************************************************************************
+
+#define CELL_WIDTH 16
+#define CELL_HEIGHT 16
+
+#define W_EMPT 0x00
+#define W_PLA1 0x01
+#define W_PLA2 0x02
+#define W_PLA3 0x04
+#define W_PLA4 0x08
+#define W_SOL1 0x10
+#define W_SOL2 0x20
+#define W_LIFE 0x40
+#define W_WALL 0x80
+
+#define CL_WH LCD_COLOR_WHITE
+#define CL_LG LCD_COLOR_LIGHTGRAY
+#define CL_DG LCD_COLOR_DARKGRAY
+#define CL_BL LCD_COLOR_BLACK
+
+//----------------------------------------------------------------------------------------------------
+
+void InitializeWorld() {
+    static const UINT8 data[] = {
+        W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL,
+        W_WALL, W_PLA1, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
+        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
+        W_WALL, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_WALL,
+        W_WALL, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_WALL,
+        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_EMPT, W_WALL, W_WALL, W_WALL, W_WALL, W_EMPT, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
+        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
+        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
+        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_EMPT, W_WALL, W_WALL, W_WALL, W_WALL, W_EMPT, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
+        W_WALL, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_WALL,
+        W_WALL, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_WALL,
+        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
+        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_PLA2, W_WALL,
+        W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL,
+        W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT
+    };
+    UINT8 i, j, k = 0;
+    for (i = 0; i < MAX_ROWS; ++i) {
+        for (j = 0; j < MAX_COLS; ++j, ++k) {
+            game_data.world[i][j] = data[k];
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawWorlCell(UINT8 row, UINT8 col) {
+    UINT8 victim = game_data.world[row][col];
+    switch (victim) {
+    case W_PLA1: DrawWorldPlayer1(row, col); break;
+    case W_PLA2: DrawWorldPlayer2(row, col); break;
+    case W_SOL1: DrawWorldSoldier1(row, col); break;
+    case W_LIFE: DrawWorldLife(row, col); break;
+    case W_WALL: DrawWorldWall(row, col); break;
+    default: DrawWorldEmpty(row, col); break;
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawWorldPlayer1(UINT8 row, UINT8 col) {
+	//TODO: Complete this function...
+    //...
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawWorldPlayer2(UINT8 row, UINT8 col) {
+	//TODO: Complete this function...
+    //...
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawWorldSoldier1(UINT8 row, UINT8 col) {
+	//TODO: Complete this function...
+    //...
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawWorldLife(UINT8 row, UINT8 col) {
+	//TODO: Complete this function...
+    //...
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawWorldWall(UINT8 row, UINT8 col) {
+	//TODO: Complete this function...
+    //...
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawWorldEmpty(UINT8 row, UINT8 col) {
+    static const UINT8 data[] = {
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
+        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH
+    };
+    DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
+}
+
+//****************************************************************************************************
+// Game Logic
+//****************************************************************************************************
+
+void InitializeNewGame() {
+	//TODO: Complete this function...
+    InitializeWorld();
+    game_data.lastScore = 0;
+    game_data.victory = FALSE;
+	//...
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawGame() {
+    UINT8 i, j;
+    for (i = 0; i < MAX_ROWS; ++i) {
+        for (j = 0; j < MAX_COLS; ++j) {
+            DrawWorlCell(i, j);
+        }
+    }
+    PutStringLCD(0, 224, LCD_COLOR_BLACK, "Score:");
+    DrawGameScore();
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawGameScore() {
+    PutStringLCD(240, 224, LCD_COLOR_BLACK, ScoreToString10(game_data.lastScore));
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data) {
+    UINT8 i, j, k;
+    for (i = 0; i < CELL_HEIGHT; ++i) {
+        for (j = 0; j < CELL_WIDTH; ++j, ++k) {
+            PutPixelLCD(x + j, y + i, data[k]);
+        }
+    }
+}
+
+//****************************************************************************************************
+// Menus
 //****************************************************************************************************
 
 void DrawMenu() {
@@ -115,16 +281,6 @@ void DrawNewGame() {
     PutString2LCD(96, 32, LCD_COLOR_BLACK, "NEW GAME"); //8
     PutStringLCD(84, 112, LCD_COLOR_BLACK, "Waiting player 2..."); //19
     PutStringLCD(116, 192, LCD_COLOR_BLACK, "P) Cancel"); //9
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGame() {
-	//TODO: Complete this function...
-    ClearLCD();
-    //...
-    //(320-(16*))/2
-    //(320-(8*))/2
 }
 
 //----------------------------------------------------------------------------------------------------

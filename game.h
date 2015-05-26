@@ -36,6 +36,8 @@ extern "C" {
 #define MAX_SCORES 8
 #define PLAYER_ONE 0
 #define PLAYER_TWO 1
+#define MAX_COLS 20
+#define MAX_ROWS 15
 
 //------------------------------------------------------------
 // Types
@@ -46,6 +48,7 @@ typedef struct {
 	// General:
     UINT32 scores[MAX_SCORES];
     // Current game:
+    UINT8 world[MAX_ROWS][MAX_COLS];
     UINT32 lastScore;
     BOOL victory;
 } GameData;
@@ -68,12 +71,33 @@ void SaveScores();
 void LoadScores();
 
 //------------------------------------------------------------
-// Render
+// World
+//------------------------------------------------------------
+
+void InitializeWorld();
+void DrawWorlCell(UINT8 row, UINT8 col);
+void DrawWorldPlayer1(UINT8 row, UINT8 col);
+void DrawWorldPlayer2(UINT8 row, UINT8 col);
+void DrawWorldSoldier1(UINT8 row, UINT8 col);
+void DrawWorldLife(UINT8 row, UINT8 col);
+void DrawWorldWall(UINT8 row, UINT8 col);
+void DrawWorldEmpty(UINT8 row, UINT8 col);
+
+//------------------------------------------------------------
+// Game
+//------------------------------------------------------------
+
+void InitializeNewGame();
+void DrawGame();
+void DrawGameScore();
+void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data);
+
+//------------------------------------------------------------
+// Menus
 //------------------------------------------------------------
 
 void DrawMenu();
 void DrawNewGame();
-void DrawGame();
 void DrawGameOver();
 void DrawScores();
 void DrawHelp();
