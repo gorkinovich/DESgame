@@ -63,6 +63,7 @@ void InitializeGame();
 void InitializeScores();
 void AddScore(UINT32 score);
 char * ScoreToString(UINT32 score);
+char * ScoreToString10(UINT32 score);
 void SaveScores();
 void LoadScores();
 

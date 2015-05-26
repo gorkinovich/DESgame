@@ -21,6 +21,7 @@
 //****************************************************************************************************
 
 #include "game.h"
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -71,6 +72,14 @@ void AddScore(UINT32 score) {
 
 char * ScoreToString(UINT32 score) {
     static char buffer[16];
+    sprintf(buffer, "%d", score);
+    return buffer;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+char * ScoreToString10(UINT32 score) {
+    static char buffer[16];
     sprintf(buffer, "%10d", score);
     return buffer;
 }
@@ -102,13 +111,10 @@ void DrawMenu() {
 //----------------------------------------------------------------------------------------------------
 
 void DrawNewGame() {
-	//TODO: Complete this function...
     ClearLCD();
     PutString2LCD(96, 32, LCD_COLOR_BLACK, "NEW GAME"); //8
-    PutStringLCD(0, 96, LCD_COLOR_BLACK, "Waiting player 2...");
-    PutStringLCD(0, 96, LCD_COLOR_BLACK, "0)");
-    //...
-    //(320-(8*))/2
+    PutStringLCD(84, 112, LCD_COLOR_BLACK, "Waiting player 2..."); //19
+    PutStringLCD(116, 192, LCD_COLOR_BLACK, "P) Cancel"); //9
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -124,12 +130,17 @@ void DrawGame() {
 //----------------------------------------------------------------------------------------------------
 
 void DrawGameOver() {
-	//TODO: Complete this function...
     ClearLCD();
-    PutString2LCD(96, 32, LCD_COLOR_BLACK, "VICTORY!"); //8
-    PutString2LCD(88, 32, LCD_COLOR_BLACK, "GAME OVER"); //9
-    //...
-    //(320-(8*))/2
+    if (game_data.victory) {
+        PutString2LCD(96, 32, LCD_COLOR_BLACK, "VICTORY!"); //8
+    } else {
+        PutString2LCD(88, 32, LCD_COLOR_BLACK, "GAME OVER"); //9
+    }
+    char * score = ScoreToString(game_data.lastScore);
+    UINT16 x = (LCD_WIDTH - (FONT_WIDTH * strlen(score))) / 2;
+    PutStringLCD(64, 96, LCD_COLOR_BLACK, "This is your last score:"); //24
+    PutStringLCD(x, 128, LCD_COLOR_BLACK, score);
+    PutStringLCD(48, 192, LCD_COLOR_BLACK, "Press any key to continue..."); //28
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -155,7 +166,7 @@ void DrawScores() {
     for (i = 0; i < MAX_SCORES; ++i) {
         if (game_data.scores[i]) {
             PutStringLCD(132, 80 + i * FONT_HEIGHT, LCD_COLOR_BLACK,
-                ScoreToString(game_data.scores[i]));
+                ScoreToString10(game_data.scores[i]));
         }
     }
 }

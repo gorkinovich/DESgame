@@ -858,6 +858,8 @@ void PutStringLCD(UINT16 x, UINT16 y, UINT8 color, const char * value) {
 	while (c = value[i]) {
 		if (c == '\n') {
 			dx = x, dy += FONT_HEIGHT;
+		} else if (c == ' ') {
+			dx += FONT_WIDTH;
 		} else {
 			PutCharLCD(dx, dy, color, c);
 			dx += FONT_WIDTH;
@@ -908,6 +910,8 @@ void PutString2LCD(UINT16 x, UINT16 y, UINT8 color, const char * value) {
 	while (c = value[i]) {
 		if (c == '\n') {
 			dx = x, dy += (FONT_HEIGHT * 2);
+		} else if (c == ' ') {
+			dx += (FONT_WIDTH * 2);
 		} else {
 			PutChar2LCD(dx, dy, color, c);
 			dx += (FONT_WIDTH * 2);
