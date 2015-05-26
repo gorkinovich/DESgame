@@ -194,6 +194,9 @@ void TurnOffRightLed();
 #define LCD_COLOR_DARKGRAY  0xA
 #define LCD_COLOR_BLACK     0xF
 
+#define FONT_WIDTH 8
+#define FONT_HEIGHT 16
+
 void InitializeLCD();
 BOOL IsOnLCD();
 void TurnOnLCD();

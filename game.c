@@ -21,12 +21,69 @@
 //****************************************************************************************************
 
 #include "game.h"
+#include <stdlib.h>
+#include <stdio.h>
+
+//****************************************************************************************************
+// Data
+//****************************************************************************************************
+
+GameData game_data;
 
 //****************************************************************************************************
 // General
 //****************************************************************************************************
 
 void InitializeGame() {
+	//TODO: Complete this function...
+	InitializeScores();
+	//...
+}
+
+//****************************************************************************************************
+// Scores
+//****************************************************************************************************
+
+void InitializeScores() {
+    UINT8 i;
+    for (i = 0; i < MAX_SCORES; ++i) {
+        game_data.scores[i] = 0;
+    }
+    LoadScores();
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void AddScore(UINT32 score) {
+    UINT8 i, j;
+    for (i = 0; i < MAX_SCORES; ++i) {
+        if (score > game_data.scores[i]) {
+            for (j = MAX_SCORES - 1; j > i; --j) {
+                game_data.scores[j] = game_data.scores[j - 1];
+            }
+            game_data.scores[i] = score;
+        }
+    }
+    SaveScores();
+}
+
+//----------------------------------------------------------------------------------------------------
+
+char * ScoreToString(UINT32 score) {
+    static char buffer[16];
+    sprintf(buffer, "%10d", score);
+    return buffer;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void SaveScores() {
+	//TODO: Complete this function...
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void LoadScores() {
 	//TODO: Complete this function...
 }
 
@@ -78,26 +135,50 @@ void DrawGameOver() {
 //----------------------------------------------------------------------------------------------------
 
 void DrawScores() {
-	//TODO: Complete this function...
+    static const UINT8 MAX_LINES = 8;
+    static const char * lines[] = {
+        "1) ----------", //13
+        "2) ----------",
+        "3) ----------",
+        "4) ----------",
+        "5) ----------",
+        "6) ----------",
+        "7) ----------",
+        "8) ----------"
+    };
+    UINT8 i;
     ClearLCD();
     PutString2LCD(112, 32, LCD_COLOR_BLACK, "SCORES"); //6
-    PutStringLCD(0, 96, LCD_COLOR_BLACK, "");
-    //...
-    //(320-(8*))/2
+    for (i = 0; i < MAX_LINES; ++i) {
+        PutStringLCD(108, 80 + FONT_HEIGHT * i, LCD_COLOR_BLACK, lines[i]);
+    }
+    for (i = 0; i < MAX_SCORES; ++i) {
+        if (game_data.scores[i]) {
+            PutStringLCD(132, 80 + i * FONT_HEIGHT, LCD_COLOR_BLACK,
+                ScoreToString(game_data.scores[i]));
+        }
+    }
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void DrawHelp() {
+    static const UINT8 MAX_LINES = 9;
+    static const char * lines[] = {
+        "|----------|-----------------------|",
+        "| Keyboard | Move with the arrows: |",
+        "|  A B C D |                       |",
+        "|  E F G H |         UP:B          |",
+        "|  I J K L | LEFT:E        RIGHT:G |",
+        "|  M N O P |        DOWN:J         |",
+        "|----------|                       |",
+        "           | Fire with: F          |",
+        "           |-----------------------|"
+    };
+    UINT8 i;
     ClearLCD();
     PutString2LCD(128, 32, LCD_COLOR_BLACK, "HELP"); //4
-    PutStringLCD(16,  80, LCD_COLOR_BLACK, "|----------|-----------------------|");
-    PutStringLCD(16,  96, LCD_COLOR_BLACK, "| Keyboard | Move with the arrows: |");
-    PutStringLCD(16, 112, LCD_COLOR_BLACK, "|  A B C D |                       |");
-    PutStringLCD(16, 128, LCD_COLOR_BLACK, "|  E F G H |         UP:B          |");
-    PutStringLCD(16, 144, LCD_COLOR_BLACK, "|  I J K L | LEFT:E        RIGHT:G |");
-    PutStringLCD(16, 160, LCD_COLOR_BLACK, "|  M N O P |        DOWN:J         |");
-    PutStringLCD(16, 176, LCD_COLOR_BLACK, "|----------|                       |");
-    PutStringLCD(16, 192, LCD_COLOR_BLACK, "           | Fire with: F          |");
-    PutStringLCD(16, 208, LCD_COLOR_BLACK, "           |-----------------------|");
+    for (i = 0; i < MAX_LINES; ++i) {
+        PutStringLCD(16, 80 + FONT_HEIGHT * i, LCD_COLOR_BLACK, lines[i]);
+    }
 }

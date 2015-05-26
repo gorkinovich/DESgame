@@ -30,10 +30,41 @@ extern "C" {
 #endif
 
 //------------------------------------------------------------
+// Constants
+//------------------------------------------------------------
+
+#define MAX_SCORES 8
+#define PLAYER_ONE 0
+#define PLAYER_TWO 1
+
+//------------------------------------------------------------
+// Types
+//------------------------------------------------------------
+
+//TODO: Complete this struct...
+typedef struct {
+	// General:
+    UINT32 scores[MAX_SCORES];
+    // Current game:
+    UINT32 lastScore;
+    BOOL victory;
+} GameData;
+
+//------------------------------------------------------------
 // General
 //------------------------------------------------------------
 
 void InitializeGame();
+
+//------------------------------------------------------------
+// Scores
+//------------------------------------------------------------
+
+void InitializeScores();
+void AddScore(UINT32 score);
+char * ScoreToString(UINT32 score);
+void SaveScores();
+void LoadScores();
 
 //------------------------------------------------------------
 // Render
