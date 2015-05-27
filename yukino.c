@@ -940,8 +940,8 @@ INT32 Print2LCD(UINT16 x, UINT16 y, UINT8 color, const char * format, ...) {
 
 static BOOL UsePollingUART0 = TRUE;
 static BOOL UsePollingUART1 = TRUE;
-static UINT8 BufferUART0[UART_BUFFER_SIZE];
-static UINT8 BufferUART1[UART_BUFFER_SIZE];
+static char BufferUART0[UART_BUFFER_SIZE];
+static char BufferUART1[UART_BUFFER_SIZE];
 static volatile UINT32 ReadPtrUART0 = 0;
 static volatile UINT32 WritePtrUART0 = 0;
 static volatile UINT32 ReadPtrUART1 = 0;
@@ -1036,10 +1036,10 @@ char GetCharUART0() {
 		// The buffer register has a received data:
 		while (!(rUTRSTAT0 & 0x1));
 		// Return the last received byte:
-		return (char)RdURXH0();
+		return RdURXH0();
 	} else {
 		while (ReadPtrUART0 == WritePtrUART0);
-		char data = (char)BufferUART0[ReadPtrUART0];
+		char data = BufferUART0[ReadPtrUART0];
 		MOVE_POINTER(ReadPtrUART0);
 		return data;
 	}
@@ -1079,16 +1079,16 @@ void SendPrintfUART0(char * format, ...) {
 
 //----------------------------------------------------------------------------------------------------
 
-void GetBufferUART0(unsigned char * buffer, unsigned int size) {
+void GetBufferUART0(char * buffer, unsigned int size) {
 	unsigned int i = 0;
 	while (i < size) {
-		buffer[i++] = (unsigned char)GetCharUART0();
+		buffer[i++] = GetCharUART0();
 	}
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void SendBufferUART0(unsigned char * buffer, unsigned int size) {
+void SendBufferUART0(char * buffer, unsigned int size) {
 	unsigned int i = 0;
 	while (i < size) {
 		SendByteUART0(buffer[i++]);
@@ -1097,7 +1097,7 @@ void SendBufferUART0(unsigned char * buffer, unsigned int size) {
 
 //----------------------------------------------------------------------------------------------------
 
-void SendByteUART0(unsigned char byte) {
+void SendByteUART0(char byte) {
 	// Wait transmit buffer empty:
 	while (!(rUTRSTAT0 & 0x2));
     // Send the data:
@@ -1148,10 +1148,10 @@ char GetCharUART1() {
 		// The buffer register has a received data:
 		while (!(rUTRSTAT1 & 0x1));
 		// Return the last received byte:
-		return (char)RdURXH1();
+		return RdURXH1();
 	} else {
 		while (ReadPtrUART1 == WritePtrUART1);
-		char data = (char)BufferUART1[ReadPtrUART1];
+		char data = BufferUART1[ReadPtrUART1];
 		MOVE_POINTER(ReadPtrUART1);
 		return data;
 	}
@@ -1191,16 +1191,16 @@ void SendPrintfUART1(char * format, ...) {
 
 //----------------------------------------------------------------------------------------------------
 
-void GetBufferUART1(unsigned char * buffer, unsigned int size) {
+void GetBufferUART1(char * buffer, unsigned int size) {
 	unsigned int i = 0;
 	while (i < size) {
-		buffer[i++] = (unsigned char)GetCharUART1();
+		buffer[i++] = GetCharUART1();
 	}
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void SendBufferUART1(unsigned char * buffer, unsigned int size) {
+void SendBufferUART1(char * buffer, unsigned int size) {
 	unsigned int i = 0;
 	while (i < size) {
 		SendByteUART1(buffer[i++]);
@@ -1209,7 +1209,7 @@ void SendBufferUART1(unsigned char * buffer, unsigned int size) {
 
 //----------------------------------------------------------------------------------------------------
 
-void SendByteUART1(unsigned char byte) {
+void SendByteUART1(char byte) {
 	// Wait transmit buffer empty:
 	while (!(rUTRSTAT1 & 0x2));
     // Send the data:

@@ -236,9 +236,9 @@ char GetCharUART0();
 void SendCharUART0(char victim);
 void SendStringUART0(char * victim);
 void SendPrintfUART0(char * format, ...);
-void GetBufferUART0(unsigned char * buffer, unsigned int size);
-void SendBufferUART0(unsigned char * buffer, unsigned int size);
-void SendByteUART0(unsigned char byte);
+void GetBufferUART0(char * buffer, unsigned int size);
+void SendBufferUART0(char * buffer, unsigned int size);
+void SendByteUART0(char byte);
 
 void InitializeUART1(int bauds);
 void ActivateInterruptsUART1();
@@ -247,9 +247,9 @@ char GetCharUART1();
 void SendCharUART1(char victim);
 void SendStringUART1(char * victim);
 void SendPrintfUART1(char * format, ...);
-void GetBufferUART1(unsigned char * buffer, unsigned int size);
-void SendBufferUART1(unsigned char * buffer, unsigned int size);
-void SendByteUART1(unsigned char byte);
+void GetBufferUART1(char * buffer, unsigned int size);
+void SendBufferUART1(char * buffer, unsigned int size);
+void SendByteUART1(char byte);
 
 //------------------------------------------------------------
 // Initialization
