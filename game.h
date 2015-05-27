@@ -66,8 +66,8 @@ extern "C" {
 
 typedef struct {
     BOOL alive;
+    UINT8 direction;
     UINT8 row, col;
-    UINT8 timerCount;
 } Shoot;
 
 typedef struct {
@@ -98,6 +98,7 @@ void InitializeGame();
 void InitializeNewGame();
 void InitializePlayer(UINT8 player);
 void FindPlayerPosition(UINT8 player, UINT8 wid);
+UINT8 GetOppositePlayer(UINT8 victim);
 void PlayerOneAsHost();
 void PlayerTwoAsHost();
 
@@ -110,6 +111,9 @@ void DrawGameSprite270(UINT16 x, UINT16 y, const UINT8 * data);
 void DrawWorldPlayer(UINT8 row, UINT8 col, UINT8 player, const UINT8 * data);
 
 void RedrawPlayer(UINT8 player);
+void ClearWorldCell(UINT8 row, UINT8 col);
+void PlayerQuitOneLife(UINT8 player);
+void ExterminateAnnihilateDestroy(UINT8 player, UINT8 row, UINT8 col);
 void ExecuteActionFire(UINT8 player);
 void ExecuteActionNorth(UINT8 player);
 void ExecuteActionEast(UINT8 player);
