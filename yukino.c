@@ -936,6 +936,36 @@ INT32 Print2LCD(UINT16 x, UINT16 y, UINT8 color, const char * format, ...) {
 // UART
 //****************************************************************************************************
 
+#define UART_BUFFER_SIZE 256
+
+static BOOL UsePollingUART0 = TRUE;
+static BOOL UsePollingUART1 = TRUE;
+static UINT8 BufferUART0[UART_BUFFER_SIZE];
+static UINT8 BufferUART1[UART_BUFFER_SIZE];
+static volatile UINT32 ReadPtrUART0 = 0;
+static volatile UINT32 WritePtrUART0 = 0;
+static volatile UINT32 ReadPtrUART1 = 0;
+static volatile UINT32 WritePtrUART1 = 0;
+
+DECL_WITH_IRQ_ATTRIBUTE(OnRxUART0);
+DECL_WITH_IRQ_ATTRIBUTE(OnRxUART1);
+
+//----------------------------------------------------------------------------------------------------
+
+void OnRxUART0() {
+	//TODO: Complete this function...
+	//...
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void OnRxUART1() {
+	//TODO: Complete this function...
+	//...
+}
+
+//----------------------------------------------------------------------------------------------------
+
 void InitializeUART(int bauds) {
 	//TODO: Complete this function...
 	//...
