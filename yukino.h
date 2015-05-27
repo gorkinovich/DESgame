@@ -221,6 +221,36 @@ INT32 Print2LCD(UINT16 x, UINT16 y, UINT8 color, const char * format, ...);
 // UART
 //------------------------------------------------------------
 
+#define BAUDS_115200 115200
+
+#define LF_CHAR 0x0A
+#define CR_CHAR 0x0D
+
+void InitializeUART(int bauds);
+void ActivateInterruptsUART();
+
+void InitializeUART0(int bauds);
+void ActivateInterruptsUART0();
+void WaitTxEmptyUART0();
+char GetCharUART0();
+void SendCharUART0(char victim);
+void SendStringUART0(char * victim);
+void SendPrintfUART0(char * format, ...);
+void GetBufferUART0(void * buffer, unsigned int size);
+void SendBufferUART0(void * buffer, unsigned int size);
+void SendByteUART0(unsigned char byte);
+
+void InitializeUART1(int bauds);
+void ActivateInterruptsUART1();
+void WaitTxEmptyUART1();
+char GetCharUART1();
+void SendCharUART1(char victim);
+void SendStringUART1(char * victim);
+void SendPrintfUART1(char * format, ...);
+void GetBufferUART1(void * buffer, unsigned int size);
+void SendBufferUART1(void * buffer, unsigned int size);
+void SendByteUART1(unsigned char byte);
+
 //------------------------------------------------------------
 // Initialization
 //------------------------------------------------------------
