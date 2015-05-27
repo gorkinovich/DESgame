@@ -61,13 +61,13 @@
 //****************************************************************************************************
 
 GameData game_data;
+static unsigned int game_seed = 0;
 
 //****************************************************************************************************
 // Game
 //****************************************************************************************************
 
 void InitializeGame() {
-    srand(0);
     InitializeScores();
     InitializeNewGame();
     PlayerOneAsHost();
@@ -87,6 +87,7 @@ void InitializeNewGame() {
     game_data.entityCount = 0;
     game_data.lastScore = 0;
     game_data.victory = FALSE;
+    srand(game_seed);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -632,6 +633,8 @@ void UpdateOnTimer() {
     //TODO: Complete this function...
     if (game_data.state == STATE_GAME) {
         UpdateGame();
+    } else {
+        ++game_seed;
     }
 	//...
 }
