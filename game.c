@@ -30,6 +30,13 @@
 //****************************************************************************************************
 
 #define MAX_UPDATE_COUNT 1
+#define MAX_ENTITY_COUNT 2
+#define MAX_LIVES_COUNT  200
+
+#define SCORE_SOLDIER1 8
+#define SCORE_SOLDIER2 16
+#define SCORE_PLAYER   32
+#define SCORE_LIFE     64
 
 #define CELL_WIDTH  16
 #define CELL_HEIGHT 16
@@ -60,6 +67,7 @@ GameData game_data;
 //****************************************************************************************************
 
 void InitializeGame() {
+    srand(0);
     InitializeScores();
     InitializeNewGame();
     PlayerOneAsHost();
@@ -76,6 +84,7 @@ void InitializeNewGame() {
     }
     game_data.lastAction = ACTION_NONE;
     game_data.remoteAction = ACTION_NONE;
+    game_data.entityCount = 0;
     game_data.lastScore = 0;
     game_data.victory = FALSE;
 }
@@ -267,13 +276,13 @@ void ExterminateAnnihilateDestroy(UINT8 player, UINT8 row, UINT8 col) {
     switch (game_data.world[row][col]) {
     case W_PLA1:
         if (player == PLAYER_TWO) {
-            PlayerAddScore(player, 32);
+            PlayerAddScore(player, SCORE_PLAYER);
             PlayerQuitOneLife(PLAYER_ONE);
         }
         break;
     case W_PLA2:
         if (player == PLAYER_ONE) {
-            PlayerAddScore(player, 32);
+            PlayerAddScore(player, SCORE_PLAYER);
             PlayerQuitOneLife(PLAYER_TWO);
         }
         break;
@@ -284,14 +293,23 @@ void ExterminateAnnihilateDestroy(UINT8 player, UINT8 row, UINT8 col) {
         ClearWorldCell(row, col);
         break;
     case W_SOL1:
-        PlayerAddScore(player, 8);
+        if (game_data.entityCount > 0) {
+            game_data.entityCount--;
+        }
+        PlayerAddScore(player, SCORE_SOLDIER1);
         ClearWorldCell(row, col);
         break;
     case W_SOL2:
-        PlayerAddScore(player, 16);
+        if (game_data.entityCount > 0) {
+            game_data.entityCount--;
+        }
+        PlayerAddScore(player, SCORE_SOLDIER2);
         ClearWorldCell(row, col);
         break;
     case W_LIFE:
+        if (game_data.entityCount > 0) {
+            game_data.entityCount--;
+        }
         ClearWorldCell(row, col);
         break;
     }
@@ -386,7 +404,14 @@ void ExecuteActionMove(UINT8 player, UINT8 row1, UINT8 col1, UINT8 row2, UINT8 c
         move = TRUE;
     } else if (game_data.world[row2][col2] == W_LIFE) {
         move = TRUE;
-        game_data.players[player].lives++;
+        if (game_data.players[player].lives < MAX_LIVES_COUNT) {
+            game_data.players[player].lives++;
+        } else {
+            PlayerAddScore(player, SCORE_LIFE);
+        }
+        if (game_data.entityCount > 0) {
+            game_data.entityCount--;
+        }
         DrawGameScoreAndLives();
     }
     if (move) {
@@ -444,6 +469,37 @@ void UpdatePlayerShoot(UINT8 player) {
 
 //----------------------------------------------------------------------------------------------------
 
+void PutGeneratedEntity(UINT8 value) {
+    UINT8 c = 0, row, col;
+    do {
+        row = (rand() % (MAX_ROWS - 3)) + 1;
+        col = (rand() % (MAX_COLS - 2)) + 1;
+        if (IsCellEmpty(row, col)) {
+            game_data.entityCount++;
+            game_data.world[row][col] = value;
+            DrawWorlCell(row, col);
+            return;
+        } else {
+            ++c;
+        }
+    } while(c < 5);
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void UpdateEntityGenerator() {
+    if (game_data.entityCount < MAX_ENTITY_COUNT) {
+        int victim = rand() % 1000;
+        if (victim <= 10) {
+            PutGeneratedEntity(W_LIFE);
+        } else if (victim <= 200) {
+            PutGeneratedEntity(W_SOL1);
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
 void UpdateGame() {
     static UINT8 count = 0;
     UpdatePlayerShoot(PLAYER_ONE);
@@ -455,6 +511,7 @@ void UpdateGame() {
         UINT8 remotePlayer = GetOppositePlayer(game_data.hostPlayer);
         ExecuteAction(remotePlayer, game_data.remoteAction);
         game_data.remoteAction = ACTION_NONE;
+        UpdateEntityGenerator();
     } else {
         ++count;
     }

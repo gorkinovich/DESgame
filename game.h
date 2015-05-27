@@ -85,7 +85,7 @@ typedef struct {
     UINT8 world[MAX_ROWS][MAX_COLS];
     Player players[MAX_PLAYERS];
     UINT8 lastAction, remoteAction;
-    UINT8 hostPlayer;
+    UINT8 hostPlayer, entityCount;
     UINT32 lastScore;
     BOOL victory;
 } GameData;
@@ -113,6 +113,7 @@ void DrawWorldPlayer(UINT8 row, UINT8 col, UINT8 player, const UINT8 * data);
 void RedrawPlayer(UINT8 player);
 void ClearWorldCell(UINT8 row, UINT8 col);
 void PlayerQuitOneLife(UINT8 player);
+void PlayerAddScore(UINT8 player, UINT32 value);
 void ExterminateAnnihilateDestroy(UINT8 player, UINT8 row, UINT8 col);
 void ExecuteActionFire(UINT8 player);
 void ExecuteActionNorth(UINT8 player);
@@ -122,6 +123,8 @@ void ExecuteActionWest(UINT8 player);
 void ExecuteActionMove(UINT8 player, UINT8 row1, UINT8 col1, UINT8 row2, UINT8 col2);
 void ExecuteAction(UINT8 player, UINT8 action);
 void UpdatePlayerShoot(UINT8 player);
+void PutGeneratedEntity(UINT8 value);
+void UpdateEntityGenerator();
 void UpdateGame();
 
 //------------------------------------------------------------
