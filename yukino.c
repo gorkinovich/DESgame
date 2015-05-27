@@ -36,9 +36,9 @@
 //----------------------------------------------------------------------------------------------------
 
 void ClearAllPendingInterrupts() {
-    // Enviamos el bit 1 para borrar todas las marcas de interrupciones pendientes.
-    // (Página 233, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
-    // (Página 281 y 294, S3C44B0X RISC MICROPROCESSOR, INTERRUPT CONTROLLER)
+    // Send the bit 1 to clean all the pending interrupts marks.
+    // (Page 233, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
+    // (Page 281 y 294, S3C44B0X RISC MICROPROCESSOR, INTERRUPT CONTROLLER)
     rEXTINTPND = 0x0F;
     rI_ISPC    = 0x3ffffff;
 }
@@ -46,22 +46,22 @@ void ClearAllPendingInterrupts() {
 //----------------------------------------------------------------------------------------------------
 
 void ClearInterruptMask() {
-    // (Página 284, S3C44B0X RISC MICROPROCESSOR, INTERRUPT CONTROLLER)
+    // (Page 284, S3C44B0X RISC MICROPROCESSOR, INTERRUPT CONTROLLER)
     rINTMSK = 0x07FFFFFF;
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void AddInterruptMask(unsigned mask) {
-    // (Página 284, S3C44B0X RISC MICROPROCESSOR, INTERRUPT CONTROLLER)
+    // (Page 284, S3C44B0X RISC MICROPROCESSOR, INTERRUPT CONTROLLER)
     rINTMSK &= ~(BIT_GLOBAL | mask);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SetInterruptModeToIRQ() {
-    // Configura todas las líneas al modo IRQ y habilita el modo vectorizado.
-    // (Página 280 y 283, S3C44B0X RISC MICROPROCESSOR, INTERRUPT CONTROLLER)
+    // Configures all the lines in IRQ mode & enable the vectorized mode.
+    // (Page 280 y 283, S3C44B0X RISC MICROPROCESSOR, INTERRUPT CONTROLLER)
     rINTMOD = 0x00;
     rINTCON = 0x01;
 }
@@ -112,93 +112,93 @@ void InitializeTimerInterrupts(UINT8 timer, UINT8 prescaler, UINT8 divider, unsi
         SetInterruptModeToIRQ();
         switch (timer) {
         case TIMER_ID0:
-            // Configurar la interrupción para el timer 0:
+            // Configure timer 0 interruption:
             AddInterruptMask(BIT_TIMER0);
             pISR_TIMER0 = onEventFunction;
-            // Configurar el timer 0:
+            // Configure timer 0:
             rTCFG0  = (rTCFG0 & 0xFFFFFF00) | prescaler;
             rTCFG1  = (rTCFG1 & 0xFFFFFFF0) | divider;
             rTCNTB0 = count;
             rTCMPB0 = compare;
             // Timer Control Register:
-            rTCON |=  (0x01 << 1); // Activar la actualización manual
-            rTCON &= ~(0x01 << 1); // Desactivar la actualización manual
-            rTCON |=  (0x01 << 3); // Activar la auto-recarga
-            rTCON |=  (0x01 << 0); // Iniciar la ejecución del timer
+            rTCON |=  (0x01 << 1); // Activate the manual update
+            rTCON &= ~(0x01 << 1); // Deactivate the manual update
+            rTCON |=  (0x01 << 3); // Activate the auto-reload
+            rTCON |=  (0x01 << 0); // Start the timer execution
             break;
         case TIMER_ID1:
-            // Configurar la interrupción para el timer 1:
+            // Configure timer 1 interruption:
             AddInterruptMask(BIT_TIMER1);
             pISR_TIMER1 = onEventFunction;
-            // Configurar el timer 1:
+            // Configure timer 1:
             rTCFG0  = (rTCFG0 & 0xFFFFFF00) | prescaler;
             rTCFG1  = (rTCFG1 & 0xFFFFFF0F) | (divider << 4);
             rTCNTB1 = count;
             rTCMPB1 = compare;
             // Timer Control Register:
-            rTCON |=  (0x01 <<  9); // Activar la actualización manual
-            rTCON &= ~(0x01 <<  9); // Desactivar la actualización manual
-            rTCON |=  (0x01 << 11); // Activar la auto-recarga
-            rTCON |=  (0x01 <<  8); // Iniciar la ejecución del timer
+            rTCON |=  (0x01 <<  9); // Activate the manual update
+            rTCON &= ~(0x01 <<  9); // Deactivate the manual update
+            rTCON |=  (0x01 << 11); // Activate the auto-reload
+            rTCON |=  (0x01 <<  8); // Start the timer execution
             break;
         case TIMER_ID2:
-            // Configurar la interrupción para el timer 2:
+            // Configure timer 2 interruption:
             AddInterruptMask(BIT_TIMER2);
             pISR_TIMER2 = onEventFunction;
-            // Configurar el timer 2:
+            // Configure timer 2:
             rTCFG0  = (rTCFG0 & 0xFFFF00FF) | (prescaler << 8);
             rTCFG1  = (rTCFG1 & 0xFFFFF0FF) | (divider   << 8);
             rTCNTB2 = count;
             rTCMPB2 = compare;
             // Timer Control Register:
-            rTCON |=  (0x01 << 13); // Activar la actualización manual
-            rTCON &= ~(0x01 << 13); // Desactivar la actualización manual
-            rTCON |=  (0x01 << 15); // Activar la auto-recarga
-            rTCON |=  (0x01 << 12); // Iniciar la ejecución del timer
+            rTCON |=  (0x01 << 13); // Activate the manual update
+            rTCON &= ~(0x01 << 13); // Deactivate the manual update
+            rTCON |=  (0x01 << 15); // Activate the auto-reload
+            rTCON |=  (0x01 << 12); // Start the timer execution
             break;
         case TIMER_ID3:
-            // Configurar la interrupción para el timer 3:
+            // Configure timer 3 interruption:
             AddInterruptMask(BIT_TIMER3);
             pISR_TIMER3 = onEventFunction;
-            // Configurar el timer 3:
+            // Configure timer 3:
             rTCFG0  = (rTCFG0 & 0xFFFF00FF) | (prescaler <<  8);
             rTCFG1  = (rTCFG1 & 0xFFFF0FFF) | (divider   << 12);
             rTCNTB3 = count;
             rTCMPB3 = compare;
             // Timer Control Register:
-            rTCON |=  (0x01 << 17); // Activar la actualización manual
-            rTCON &= ~(0x01 << 17); // Desactivar la actualización manual
-            rTCON |=  (0x01 << 19); // Activar la auto-recarga
-            rTCON |=  (0x01 << 16); // Iniciar la ejecución del timer
+            rTCON |=  (0x01 << 17); // Activate the manual update
+            rTCON &= ~(0x01 << 17); // Deactivate the manual update
+            rTCON |=  (0x01 << 19); // Activate the auto-reload
+            rTCON |=  (0x01 << 16); // Start the timer execution
             break;
         case TIMER_ID4:
-            // Configurar la interrupción para el timer 4:
+            // Configure timer 4 interruption:
             AddInterruptMask(BIT_TIMER4);
             pISR_TIMER4 = onEventFunction;
-            // Configurar el timer 4:
+            // Configure timer 4:
             rTCFG0  = (rTCFG0 & 0xFF00FFFF) | (prescaler << 16);
             rTCFG1  = (rTCFG1 & 0xFFF0FFFF) | (divider   << 16);
             rTCNTB4 = count;
             rTCMPB4 = compare;
             // Timer Control Register:
-            rTCON |=  (0x01 << 21); // Activar la actualización manual
-            rTCON &= ~(0x01 << 21); // Desactivar la actualización manual
-            rTCON |=  (0x01 << 23); // Activar la auto-recarga
-            rTCON |=  (0x01 << 20); // Iniciar la ejecución del timer
+            rTCON |=  (0x01 << 21); // Activate the manual update
+            rTCON &= ~(0x01 << 21); // Deactivate the manual update
+            rTCON |=  (0x01 << 23); // Activate the auto-reload
+            rTCON |=  (0x01 << 20); // Start the timer execution
             break;
         case TIMER_ID5:
-            // Configurar la interrupción para el timer 5:
+            // Configure timer 5 interruption:
             AddInterruptMask(BIT_TIMER5);
             pISR_TIMER5 = onEventFunction;
-            // Configurar el timer 5:
+            // Configure timer 5:
             rTCFG0  = (rTCFG0 & 0xFF00FFFF) | (prescaler << 16);
             rTCFG1  = (rTCFG1 & 0xFF0FFFFF) | (divider   << 20);
             rTCNTB5 = count;
             // Timer Control Register:
-            rTCON |=  (0x01 << 25); // Activar la actualización manual
-            rTCON &= ~(0x01 << 25); // Desactivar la actualización manual
-            rTCON |=  (0x01 << 26); // Activar la auto-recarga
-            rTCON |=  (0x01 << 24); // Iniciar la ejecución del timer
+            rTCON |=  (0x01 << 25); // Activate the manual update
+            rTCON &= ~(0x01 << 25); // Deactivate the manual update
+            rTCON |=  (0x01 << 26); // Activate the auto-reload
+            rTCON |=  (0x01 << 24); // Start the timer execution
             break;
         }
         ClearAllPendingInterrupts();
@@ -227,37 +227,37 @@ void ChangeTimerInterrupts(UINT8 timer, UINT8 prescaler, UINT8 divider, unsigned
     if (timer < MAX_TIMERS) {
         switch (timer) {
         case TIMER_ID0:
-            // Configurar el timer 0:
+            // Configure timer 0:
             rTCFG0  = (rTCFG0 & 0xFFFFFF00) | prescaler;
             rTCFG1  = (rTCFG1 & 0xFFFFFFF0) | divider;
             rTCNTB0 = count;
             break;
         case TIMER_ID1:
-            // Configurar el timer 1:
+            // Configure timer 1:
             rTCFG0  = (rTCFG0 & 0xFFFFFF00) | prescaler;
             rTCFG1  = (rTCFG1 & 0xFFFFFF0F) | (divider << 4);
             rTCNTB1 = count;
             break;
         case TIMER_ID2:
-            // Configurar el timer 2:
+            // Configure timer 2:
             rTCFG0  = (rTCFG0 & 0xFFFF00FF) | (prescaler << 8);
             rTCFG1  = (rTCFG1 & 0xFFFFF0FF) | (divider   << 8);
             rTCNTB2 = count;
             break;
         case TIMER_ID3:
-            // Configurar el timer 3:
+            // Configure timer 3:
             rTCFG0  = (rTCFG0 & 0xFFFF00FF) | (prescaler <<  8);
             rTCFG1  = (rTCFG1 & 0xFFFF0FFF) | (divider   << 12);
             rTCNTB3 = count;
             break;
         case TIMER_ID4:
-            // Configurar el timer 4:
+            // Configure timer 4:
             rTCFG0  = (rTCFG0 & 0xFF00FFFF) | (prescaler << 16);
             rTCFG1  = (rTCFG1 & 0xFFF0FFFF) | (divider   << 16);
             rTCNTB4 = count;
             break;
         case TIMER_ID5:
-            // Configurar el timer 5:
+            // Configure timer 5:
             rTCFG0  = (rTCFG0 & 0xFF00FFFF) | (prescaler << 16);
             rTCFG1  = (rTCFG1 & 0xFF0FFFFF) | (divider   << 20);
             rTCNTB5 = count;
@@ -325,23 +325,23 @@ void InitializeButtonsInterrupts() {
 //----------------------------------------------------------------------------------------------------
 
 void SetButtonsAsInterrupt() {
-    // Configurar los pines y habilitar el "pull up" en el puerto G.
-    // (Página 230, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
+    // Configure the pins & enable the "pull up" in the port G.
+    // (Page 230, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
     rPCONG |= 0xF000; // [PG7, PG6] = 11 -> EINT
-    rPUPG  &= 0x3F;   // [PG7, PG6] =  0 -> Activar
-    // Configurar el modo de invocación de la interrupción.
-    // (Página 232, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
+    rPUPG  &= 0x3F;   // [PG7, PG6] =  0 -> Activate
+    // Configure the invocation mode of the interruption.
+    // (Page 232, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
     rEXTINT = (rEXTINT & 0x00FFFFFF) | 0x22000000;
-    // [EINT7, EINT6] = 010 -> Int. bajo nivel, flanco de bajada
+    // [EINT7, EINT6] = 010 -> Int. low level, down flank
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SetButtonsAsInput() {
-    // Configurar los pines y habilitar el "pull up" en el puerto G.
-    // (Página 230, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
-    rPCONG &= 0x0FFF; // [PG7, PG6] = 00 -> Entrada
-    rPUPG  &= 0x3F;   // [PG7, PG6] =  0 -> Activar
+    // Configure the pins & enable the "pull up" in the port G.
+    // (Page 230, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
+    rPCONG &= 0x0FFF; // [PG7, PG6] = 00 -> Input
+    rPUPG  &= 0x3F;   // [PG7, PG6] =  0 -> Activate
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -421,23 +421,23 @@ void InitializeKeyboardInterrupts() {
 //----------------------------------------------------------------------------------------------------
 
 void SetKeyboardAsInterrupt() {
-    // Configurar los pines y habilitar el "pull up" en el puerto G.
-    // (Página 230, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
+    // Configure the pins & enable the "pull up" in the port G.
+    // (Page 230, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
     rPCONG |= 0x000C; // [PG1] = 11 -> EINT
-    rPUPG  &= 0xFD;   // [PG1] =  0 -> Activar
-    // Configurar el modo de invocación de la interrupción.
-    // (Página 232, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
+    rPUPG  &= 0xFD;   // [PG1] =  0 -> Activate
+    // Configure the invocation mode of the interruption.
+    // (Page 232, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
     rEXTINT = (rEXTINT & 0xFFFFFF0F) | 0x00000020;
-    // [EINT1] = 010 -> Int. bajo nivel, flanco de bajada
+    // [EINT1] = 010 -> Int. low level, down flank
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SetKeyboardAsInput() {
-    // Configurar los pines y habilitar el "pull up" en el puerto G.
-    // (Página 230, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
-    rPCONG &= 0xFFF3; // [PG1] = 00 -> Entrada
-    rPUPG  &= 0xFD;   // [PG1] =  0 -> Activar
+    // Configure the pins & enable the "pull up" in the port G.
+    // (Page 230, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
+    rPCONG &= 0xFFF3; // [PG1] = 00 -> Input
+    rPUPG  &= 0xFD;   // [PG1] =  0 -> Activate
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -697,7 +697,7 @@ static UINT32 ScreenBufferLCD[LCD_BUFFER_SIZE] __attribute__ ((section (".lcdbuf
 //#define LCD_BUFFER_SIZE  (LCD_WIDTH * LCD_HEIGHT / 2)
 //static UINT8 ScreenBufferLCD[LCD_BUFFER_SIZE] __attribute__ ((section (".lcdbuffer")));
 
-// Añadir en fichero de enlace (*.ld):
+// Add in the link file (*.ld):
 // . = 0x0C300000;
 // .lcdbuffer : { *(.lcdbuffer) }
 
@@ -714,18 +714,18 @@ inline UINT16 PixelToOffsetLCD(UINT16 x) {
 //----------------------------------------------------------------------------------------------------
 
 void InitializeLCD() {
-    // Configura el controlador del LCD dejándolo apagado:
-    // + Resolución: 320x240
-    // + Modo de barrido: 4 bit single scan
-    // + Modo del LCD: 16 niveles de gris
-    // + Paletas de color: no
-    // + Frecuencia de refresco: 120 Hz
-    // + Self-refresh: desactivado
-    // + Polaridad de señales de sincronismo: normal
-    // + Conmutación de VM: en cada frame
-    // + Anchura del blanking horizontal: mínima
-    // + Retardo y anchura de pulso de sincronismo horizontal: mínimos
-    // + Valores de dithering: por defecto
+    // Configure the LCD controller & turn it off:
+    // + Screen resolution: 320x240
+    // + Scan mode: 4 bit single scan
+    // + LCD mode: 16 levels of gray
+    // + Color palettes: no
+    // + Refresh: 120 Hz
+    // + Self-refresh: disabled
+    // + Sync polarity signal: normal
+    // + VM commutation: each frame
+    // + The horizontal blanking width: minimum
+    // + Delay and pulse width horizontal sync: minimum
+    // + Dithering values: by default
     rLCDCON1   = 0x0000D021;
     rLCDCON2   = 0x00013CEF;
     rLCDSADDR1 = 0x16180000;
@@ -950,174 +950,270 @@ static volatile UINT32 WritePtrUART1 = 0;
 DECL_WITH_IRQ_ATTRIBUTE(OnRxUART0);
 DECL_WITH_IRQ_ATTRIBUTE(OnRxUART1);
 
+#define MOVE_POINTER(ptr) ptr = (ptr + 1) % UART_BUFFER_SIZE
+
 //----------------------------------------------------------------------------------------------------
 
 void OnRxUART0() {
-	//TODO: Complete this function...
-	//...
+	UINT32 nextPtr = WritePtrUART0;
+	MOVE_POINTER(nextPtr);
+	if (nextPtr != ReadPtrUART0) {
+		WritePtrUART0 = nextPtr;
+		while (!(rUTRSTAT0 & 0x1));
+		BufferUART0[WritePtrUART0] = RdURXH0();
+	}
+    rI_ISPC = BIT_URXD0;
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void OnRxUART1() {
-	//TODO: Complete this function...
-	//...
+	UINT32 nextPtr = WritePtrUART1;
+	MOVE_POINTER(nextPtr);
+	if (nextPtr != ReadPtrUART1) {
+		WritePtrUART1 = nextPtr;
+		while (!(rUTRSTAT1 & 0x1));
+		BufferUART1[WritePtrUART1] = RdURXH1();
+	}
+    rI_ISPC = BIT_URXD1;
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void InitializeUART(int bauds) {
-	//TODO: Complete this function...
-	//...
+	InitializeUART0(bauds);
+	InitializeUART1(bauds);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void ActivateInterruptsUART() {
-	//TODO: Complete this function...
-	//...
+	ActivateInterruptsUART0();
+	ActivateInterruptsUART1();
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void InitializeUART0(int bauds) {
-	//TODO: Complete this function...
-	//...
+    // Configuration:
+    // ULCON: Normal mode operation, No parity, One stop bit per frame, 8-bits length
+    // UCON:  Tx:Level, Rx:Pulse, Rx time out disable, Rx error status interrupt disable,
+    //        Normal operation, Normal transmit, Tx/Rx interrupt request or polling mode
+    // UFCON: FIFO disable
+    // UMCON: ACF disable, Inactivate nRTS
+    rULCON0 = 0x03;
+    rUCON0  = 0x205;
+    rUFCON0 = 0x00;
+    rUMCON0 = 0x00;
+    // Baud rate divisior register:
+    rUBRDIV0 = ((int) (MCLK / 16.0 / bauds + 0.5) - 1);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void ActivateInterruptsUART0() {
-	//TODO: Complete this function...
-	//...
+    ClearAllPendingInterrupts();
+    SetInterruptModeToIRQ();
+    AddInterruptMask(BIT_URXD0);
+    pISR_URXD0 = (unsigned)OnRxUART0;
+    ClearAllPendingInterrupts();
+
+	ReadPtrUART0 = 0;
+	WritePtrUART0 = 0;
+	UsePollingUART0 = FALSE;
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void WaitTxEmptyUART0() {
-	//TODO: Complete this function...
-	//...
+	while (!(rUTRSTAT0 & 0x4));
 }
 
 //----------------------------------------------------------------------------------------------------
 
 char GetCharUART0() {
-	//TODO: Complete this function...
-	return 0;
-	//...
+	if (UsePollingUART0) {
+		// The buffer register has a received data:
+		while (!(rUTRSTAT0 & 0x1));
+		// Return the last received byte:
+		return (char)RdURXH0();
+	} else {
+		while (ReadPtrUART0 == WritePtrUART0);
+		char data = (char)BufferUART0[ReadPtrUART0];
+		MOVE_POINTER(ReadPtrUART0);
+		return data;
+	}
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendCharUART0(char victim) {
-	//TODO: Complete this function...
-	//...
+	// Wait transmit buffer empty:
+	while (!(rUTRSTAT0 & 0x2));
+	// Send the carriage return when new line:
+    if (victim == LF_CHAR) {
+	   WrUTXH0(CR_CHAR);
+	}
+    // Send the data:
+	WrUTXH0(victim);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendStringUART0(char * victim) {
-	//TODO: Complete this function...
-	//...
+	while (*victim) {
+		SendCharUART0(*victim++);
+	}
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendPrintfUART0(char * format, ...) {
-	//TODO: Complete this function...
-	//...
+    va_list arg_params;
+    char buffer[512];
+    va_start(arg_params, format);
+    vsprintf(buffer, format, arg_params);
+    SendStringUART0(buffer);
+    va_end(arg_params);
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void GetBufferUART0(void * buffer, unsigned int size) {
-	//TODO: Complete this function...
-	//...
+void GetBufferUART0(unsigned char * buffer, unsigned int size) {
+	unsigned int i = 0;
+	while (i < size) {
+		buffer[i++] = (unsigned char)GetCharUART0();
+	}
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void SendBufferUART0(void * buffer, unsigned int size) {
-	//TODO: Complete this function...
-	//...
+void SendBufferUART0(unsigned char * buffer, unsigned int size) {
+	unsigned int i = 0;
+	while (i < size) {
+		SendByteUART0(buffer[i++]);
+	}
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendByteUART0(unsigned char byte) {
-	//TODO: Complete this function...
-	//...
+	// Wait transmit buffer empty:
+	while (!(rUTRSTAT0 & 0x2));
+    // Send the data:
+	WrUTXH0(byte);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void InitializeUART1(int bauds) {
-	//TODO: Complete this function...
-	//...
+    // Configuration:
+    // ULCON: Normal mode operation, No parity, One stop bit per frame, 8-bits length
+    // UCON:  Tx:Level, Rx:Pulse, Rx time out disable, Rx error status interrupt disable,
+    //        Normal operation, Normal transmit, Tx/Rx interrupt request or polling mode
+    // UFCON: FIFO disable
+    // UMCON: ACF disable, Inactivate nRTS
+    rULCON1 = 0x03;
+    rUCON1  = 0x205;
+    rUFCON1 = 0x00;
+    rUMCON1 = 0x00;
+    // Baud rate divisior register:
+    rUBRDIV1 = ((int) (MCLK / 16.0 / bauds + 0.5) - 1);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void ActivateInterruptsUART1() {
-	//TODO: Complete this function...
-	//...
+    ClearAllPendingInterrupts();
+    SetInterruptModeToIRQ();
+    AddInterruptMask(BIT_URXD1);
+    pISR_URXD1 = (unsigned)OnRxUART1;
+    ClearAllPendingInterrupts();
+
+	ReadPtrUART1 = 0;
+	WritePtrUART1 = 0;
+	UsePollingUART1 = FALSE;
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void WaitTxEmptyUART1() {
-	//TODO: Complete this function...
-	//...
+	while (!(rUTRSTAT1 & 0x4));
 }
 
 //----------------------------------------------------------------------------------------------------
 
 char GetCharUART1() {
-	//TODO: Complete this function...
-	return 0;
-	//...
+	if (UsePollingUART1) {
+		// The buffer register has a received data:
+		while (!(rUTRSTAT1 & 0x1));
+		// Return the last received byte:
+		return (char)RdURXH1();
+	} else {
+		while (ReadPtrUART1 == WritePtrUART1);
+		char data = (char)BufferUART1[ReadPtrUART1];
+		MOVE_POINTER(ReadPtrUART1);
+		return data;
+	}
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendCharUART1(char victim) {
-	//TODO: Complete this function...
-	//...
+	// Wait transmit buffer empty:
+	while (!(rUTRSTAT1 & 0x2));
+	// Send the carriage return when new line:
+    if (victim == LF_CHAR) {
+	   WrUTXH1(CR_CHAR);
+	}
+    // Send the data:
+	WrUTXH1(victim);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendStringUART1(char * victim) {
-	//TODO: Complete this function...
-	//...
+	while (*victim) {
+		SendCharUART1(*victim++);
+	}
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendPrintfUART1(char * format, ...) {
-	//TODO: Complete this function...
-	//...
+    va_list arg_params;
+    char buffer[512];
+    va_start(arg_params, format);
+    vsprintf(buffer, format, arg_params);
+    SendStringUART1(buffer);
+    va_end(arg_params);
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void GetBufferUART1(void * buffer, unsigned int size) {
-	//TODO: Complete this function...
-	//...
+void GetBufferUART1(unsigned char * buffer, unsigned int size) {
+	unsigned int i = 0;
+	while (i < size) {
+		buffer[i++] = (unsigned char)GetCharUART1();
+	}
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void SendBufferUART1(void * buffer, unsigned int size) {
-	//TODO: Complete this function...
-	//...
+void SendBufferUART1(unsigned char * buffer, unsigned int size) {
+	unsigned int i = 0;
+	while (i < size) {
+		SendByteUART1(buffer[i++]);
+	}
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendByteUART1(unsigned char byte) {
-	//TODO: Complete this function...
-	//...
+	// Wait transmit buffer empty:
+	while (!(rUTRSTAT1 & 0x2));
+    // Send the data:
+	WrUTXH1(byte);
 }
 
 //****************************************************************************************************
