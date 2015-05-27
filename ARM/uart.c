@@ -58,7 +58,7 @@ void Uart0_TxInt(void){
 	uart0TxStr++;
 
 	if(caracter != '\0'){
-		Uart_SendByte(caracter);
+		UART0_SendByte(caracter);
 	}else{ //lega al final
 		rINTMSK |= (BIT_UTXD0);
 	}
@@ -145,7 +145,7 @@ void UART0_SendByte(int data) {
 void UART0_SendString(char * pt) {
 	//	 Por poling
 	while (*pt)						    // mandar byte a byte hasta completar string
-		Uart_SendByte(*pt++);
+		UART0_SendByte(*pt++);
 
 	if (!uartUsePolling) {
 		// Por interrupciones
