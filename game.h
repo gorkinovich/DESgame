@@ -67,6 +67,7 @@ extern "C" {
 typedef struct {
     BOOL alive;
     UINT8 row, col;
+    UINT8 timerCount;
 } Shoot;
 
 typedef struct {
@@ -83,7 +84,7 @@ typedef struct {
     // Current game:
     UINT8 world[MAX_ROWS][MAX_COLS];
     Player players[MAX_PLAYERS];
-    UINT8 lastAction;
+    UINT8 lastAction, remoteAction;
     UINT8 hostPlayer;
     UINT32 lastScore;
     BOOL victory;
@@ -108,11 +109,23 @@ void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data);
 void DrawGameSprite270(UINT16 x, UINT16 y, const UINT8 * data);
 void DrawWorldPlayer(UINT8 row, UINT8 col, UINT8 player, const UINT8 * data);
 
+void RedrawPlayer(UINT8 player);
+void ExecuteActionFire(UINT8 player);
+void ExecuteActionNorth(UINT8 player);
+void ExecuteActionEast(UINT8 player);
+void ExecuteActionSouth(UINT8 player);
+void ExecuteActionWest(UINT8 player);
+void ExecuteActionMove(UINT8 player, UINT8 row1, UINT8 col1, UINT8 row2, UINT8 col2);
+void ExecuteAction(UINT8 player, UINT8 action);
+void UpdatePlayerShoot(UINT8 player);
+void UpdateGame();
+
 //------------------------------------------------------------
 // Communication
 //------------------------------------------------------------
 
 void SendStartSignal();
+void StartSignalReceived();
 
 //------------------------------------------------------------
 // States
@@ -151,6 +164,8 @@ void LoadScores();
 //------------------------------------------------------------
 
 void InitializeWorld();
+BOOL IsCellEmpty(UINT8 row, UINT8 col);
+BOOL IsCellEmptyOrPickable(UINT8 row, UINT8 col);
 void DrawWorlCell(UINT8 row, UINT8 col);
 void DrawWorldPlayer1(UINT8 row, UINT8 col);
 void DrawWorldPlayer2(UINT8 row, UINT8 col);
