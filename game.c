@@ -61,6 +61,7 @@ void InitializeNewGame() {
     game_data.lastScore = 0;
     game_data.victory = FALSE;
     game_data.useInput = TRUE;
+    game_data.updateCount = 0;
     srand(game_seed);
 }
 
@@ -191,11 +192,10 @@ void UpdateEntityGenerator() {
 //----------------------------------------------------------------------------------------------------
 
 void UpdateGame() {
-    static UINT8 count = 0;
     UpdatePlayerShoot(PLAYER_ONE);
     UpdatePlayerShoot(PLAYER_TWO);
-    if (count >= MAX_UPDATE_COUNT) {
-        count = 0;
+    if (game_data.updateCount >= MAX_UPDATE_COUNT) {
+    	game_data.updateCount = 0;
         ExecuteAction(game_data.hostPlayer, game_data.lastAction);
         game_data.lastAction = ACTION_NONE;
         UINT8 remotePlayer = GetOppositePlayer(game_data.hostPlayer);
@@ -203,7 +203,7 @@ void UpdateGame() {
         game_data.remoteAction = ACTION_NONE;
         UpdateEntityGenerator();
     } else {
-        ++count;
+        game_data.updateCount++;
     }
 }
 
@@ -259,10 +259,12 @@ void UpdateOnTimer() {
     if (game_data.state == STATE_GAME) {
         if (game_data.hostPlayer == PLAYER_ONE) {
             SendPlayerOneActionMessage();
+            return;
         }
     } else {
         ++game_seed;
     }
+    ClearTimer0PendingInterrupt();
 }
 
 //****************************************************************************************************
@@ -278,6 +280,7 @@ void SendNewGameMessage() {
 void SendPlayerOneActionMessage() {
     SendByteUART1(MSG_P1_ACTION);
     SendByteUART1(game_data.lastAction);
+    SendByteUART1(game_data.updateCount);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -328,9 +331,11 @@ void UpdateOnReceiveUART() {
         break;
     case MSG_P1_ACTION:
         param1 = GetCharUART1();
+        param2 = GetCharUART1();
         if (game_data.hostPlayer == PLAYER_TWO) {
             game_data.useInput = FALSE;
             game_data.remoteAction = param1;
+            game_data.updateCount = param2;
             SendPlayerTwoActionMessage();
         }
         break;
