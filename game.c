@@ -61,7 +61,6 @@ void InitializeNewGame() {
     game_data.lastScore = 0;
     game_data.victory = FALSE;
     game_data.useInput = TRUE;
-    game_data.useTimer = TRUE;
     game_data.updateCount = 0;
     srand(game_seed);
 }
@@ -264,9 +263,10 @@ DECL_WITH_IRQ_ATTRIBUTE(UpdateOnTimer);
 void UpdateOnTimer() {
     if (game_data.pause) return;
     if (game_data.state == STATE_GAME) {
-        if (game_data.hostPlayer == PLAYER_ONE && game_data.useTimer) {
-            SendPlayerOneActionMessage();
-            game_data.useTimer = FALSE;
+        if (game_data.hostPlayer == PLAYER_ONE) {
+            StartUpdateCommunication();
+            UpdateGame();
+            FinishUpdateCommunication();
         }
     } else {
         ++game_seed;
@@ -278,44 +278,53 @@ void UpdateOnTimer() {
 // Communication
 //****************************************************************************************************
 
-void SendNewGameMessage() {
-    SendByteUART1(MSG_NEW_GAME);
+BOOL SendByte(char data) {
+    SendByteUART1(data);
+    char value = GetCharUART1();
+    return value == data;
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void SendPlayerOneActionMessage() {
-    SendByteUART1(MSG_P1_ACTION);
+char ReceiveByte() {
+    char value = GetCharUART1();
+    SendByteUART1(value);
+    return value;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void StartUpdateCommunication() {
+    SendByte(MSG_UPDATE);
     SendByteUART1(game_data.lastAction);
-    SendByteUART1(game_data.updateCount);
+    game_data.remoteAction = GetCharUART1();
+    SendByte(game_data.updateCount);
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void SendPlayerTwoActionMessage() {
-    SendByteUART1(MSG_P2_ACTION);
-    SendByteUART1(game_data.lastAction);
+void FinishUpdateCommunication() {
+    SendByte(game_data.lastGenRow);
+    SendByte(game_data.lastGenCol);
+    SendByte(game_data.lastGenVal);
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void SendGeneratedEntityMessage() {
-    SendByteUART1(MSG_GEN_ENT);
-    SendByteUART1(game_data.lastGenRow);
-    SendByteUART1(game_data.lastGenCol);
-    SendByteUART1(game_data.lastGenVal);
+BOOL SendNewGameMessage() {
+    return SendByte(MSG_NEW_GAME);
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void SendAbortMessage() {
-    SendByteUART1(MSG_ABORT);
+BOOL SendAbortMessage() {
+    return SendByte(MSG_ABORT);
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void SendTestMessage() {
-    SendByteUART1(MSG_TEST);
+BOOL SendTestMessage() {
+    return SendByte(MSG_TEST);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -335,54 +344,38 @@ void NewGameMessageReceived() {
 
 void UpdateOnReceiveUART() {
     // Get the head of the message:
-    char type = GetCharUART1();
-    char param1, param2, param3;
-    // Check the type of the message:
-    switch (type) {
-    case MSG_NEW_GAME:
-        NewGameMessageReceived();
-        break;
-    case MSG_P1_ACTION:
-        param1 = GetCharUART1();
-        param2 = GetCharUART1();
-        if (game_data.hostPlayer == PLAYER_TWO) {
+    char value = ReceiveByte();
+    // Check the state of the game:
+    if (game_data.state == STATE_NEW_GAME) {
+        // Check the type of the message & the player:
+        if (game_data.hostPlayer == PLAYER_TWO && value == MSG_UPDATE) {
             game_data.useInput = FALSE;
-            game_data.remoteAction = param1;
-            game_data.updateCount = param2;
-            SendPlayerTwoActionMessage();
-        }
-        break;
-    case MSG_P2_ACTION:
-        param1 = GetCharUART1();
-        if (game_data.hostPlayer == PLAYER_ONE) {
-            game_data.remoteAction = param1;
-            UpdateGame();
-            SendGeneratedEntityMessage();
-            game_data.useTimer = TRUE;
-        }
-        break;
-    case MSG_GEN_ENT:
-        param1 = GetCharUART1();
-        param2 = GetCharUART1();
-        param3 = GetCharUART1();
-        if (game_data.hostPlayer == PLAYER_TWO) {
-            game_data.lastGenRow = param1;
-            game_data.lastGenCol = param2;
-            game_data.lastGenVal = param3;
+            game_data.remoteAction = GetCharUART1();
+            SendByteUART1(game_data.lastAction);
+            game_data.updateCount = ReceiveByte();
+            game_data.lastGenRow = ReceiveByte();
+            game_data.lastGenCol = ReceiveByte();
+            game_data.lastGenVal = ReceiveByte();
             UpdateGame();
             game_data.useInput = TRUE;
         }
-        break;
-    case MSG_ABORT:
-        InitializeGame();
-        break;
-    case MSG_TEST:
-        if (IsPoint8Led()) {
-            ClearPoint8Led();
-        } else {
-            SetPoint8Led();
+    } else {
+        // Check the type of the message:
+        switch (value) {
+        case MSG_NEW_GAME:
+            NewGameMessageReceived();
+            break;
+        case MSG_ABORT:
+            InitializeGame();
+            break;
+        case MSG_TEST:
+            if (IsPoint8Led()) {
+                ClearPoint8Led();
+            } else {
+                SetPoint8Led();
+            }
+            break;
         }
-        break;
     }
 }
 

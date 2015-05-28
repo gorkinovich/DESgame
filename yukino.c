@@ -951,63 +951,63 @@ INT32 Print2LCD(UINT16 x, UINT16 y, UINT8 color, const char * format, ...) {
 // UART
 //****************************************************************************************************
 
-static UARTEventHandler OnReceiveUART_ = NULLPTR;
-
-void SetOnReceiveUART(UARTEventHandler value) { OnReceiveUART_ = value; }
-
-//----------------------------------------------------------------------------------------------------
-
-#define UART_BUFFER_SIZE 256
-
-#define MOVE_POINTER(ptr) ptr = (ptr + 1) % UART_BUFFER_SIZE
-
-static BOOL UsePollingUART0 = TRUE;
-static BOOL UsePollingUART1 = TRUE;
-static char BufferUART0[UART_BUFFER_SIZE];
-static char BufferUART1[UART_BUFFER_SIZE];
-static volatile UINT32 ReadPtrUART0 = 0;
-static volatile UINT32 WritePtrUART0 = 0;
-static volatile UINT32 ReadPtrUART1 = 0;
-static volatile UINT32 WritePtrUART1 = 0;
-
-DECL_WITH_IRQ_ATTRIBUTE(OnRxUART0);
-DECL_WITH_IRQ_ATTRIBUTE(OnRxUART1);
+//static UARTEventHandler OnReceiveUART_ = NULLPTR;
+//
+//void SetOnReceiveUART(UARTEventHandler value) { OnReceiveUART_ = value; }
 
 //----------------------------------------------------------------------------------------------------
 
-void OnRxUART0() {
-    while (!(rUTRSTAT0 & 0x1));
-    UINT32 nextPtr = WritePtrUART0;
-    while (rUTRSTAT0 & 0x1) {
-        MOVE_POINTER(nextPtr);
-        if (nextPtr != ReadPtrUART0) {
-            WritePtrUART0 = nextPtr;
-            BufferUART0[WritePtrUART0] = RdURXH0();
-        }
-    }
-    if (OnReceiveUART_) {
-        OnReceiveUART_(0);
-    }
-    rI_ISPC = BIT_URXD0;
-}
+//#define UART_BUFFER_SIZE 256
+//
+//#define MOVE_POINTER(ptr) ptr = (ptr + 1) % UART_BUFFER_SIZE
+//
+//static BOOL UsePollingUART0 = TRUE;
+//static BOOL UsePollingUART1 = TRUE;
+//static char BufferUART0[UART_BUFFER_SIZE];
+//static char BufferUART1[UART_BUFFER_SIZE];
+//static volatile UINT32 ReadPtrUART0 = 0;
+//static volatile UINT32 WritePtrUART0 = 0;
+//static volatile UINT32 ReadPtrUART1 = 0;
+//static volatile UINT32 WritePtrUART1 = 0;
+//
+//DECL_WITH_IRQ_ATTRIBUTE(OnRxUART0);
+//DECL_WITH_IRQ_ATTRIBUTE(OnRxUART1);
 
 //----------------------------------------------------------------------------------------------------
 
-void OnRxUART1() {
-    while (!(rUTRSTAT1 & 0x1));
-    UINT32 nextPtr = WritePtrUART1;
-    while (rUTRSTAT1 & 0x1) {
-        MOVE_POINTER(nextPtr);
-        if (nextPtr != ReadPtrUART1) {
-            WritePtrUART1 = nextPtr;
-            BufferUART1[WritePtrUART1] = RdURXH1();
-        }
-    }
-    if (OnReceiveUART_) {
-        OnReceiveUART_(1);
-    }
-    rI_ISPC = BIT_URXD1;
-}
+//void OnRxUART0() {
+//    while (!(rUTRSTAT0 & 0x1));
+//    UINT32 nextPtr = WritePtrUART0;
+//    while (rUTRSTAT0 & 0x1) {
+//        MOVE_POINTER(nextPtr);
+//        if (nextPtr != ReadPtrUART0) {
+//            WritePtrUART0 = nextPtr;
+//            BufferUART0[WritePtrUART0] = RdURXH0();
+//        }
+//    }
+//    if (OnReceiveUART_) {
+//        OnReceiveUART_(0);
+//    }
+//    rI_ISPC = BIT_URXD0;
+//}
+
+//----------------------------------------------------------------------------------------------------
+
+//void OnRxUART1() {
+//    while (!(rUTRSTAT1 & 0x1));
+//    UINT32 nextPtr = WritePtrUART1;
+//    while (rUTRSTAT1 & 0x1) {
+//        MOVE_POINTER(nextPtr);
+//        if (nextPtr != ReadPtrUART1) {
+//            WritePtrUART1 = nextPtr;
+//            BufferUART1[WritePtrUART1] = RdURXH1();
+//        }
+//    }
+//    if (OnReceiveUART_) {
+//        OnReceiveUART_(1);
+//    }
+//    rI_ISPC = BIT_URXD1;
+//}
 
 //----------------------------------------------------------------------------------------------------
 
@@ -1056,16 +1056,16 @@ void ActivateInterruptsUART0(unsigned onEventFunction) {
     ClearAllPendingInterrupts();
     SetInterruptModeToIRQ();
     AddInterruptMask(BIT_URXD0);
-    if (onEventFunction) {
+//    if (onEventFunction) {
         pISR_URXD0 = onEventFunction;
-        UsePollingUART0 = TRUE;
-    } else {
-        pISR_URXD0 = (unsigned)OnRxUART0;
-        UsePollingUART0 = FALSE;
-    }
+//        UsePollingUART0 = TRUE;
+//    } else {
+//        pISR_URXD0 = (unsigned)OnRxUART0;
+//        UsePollingUART0 = FALSE;
+//    }
     ClearAllPendingInterrupts();
-    ReadPtrUART0 = 0;
-    WritePtrUART0 = 0;
+//    ReadPtrUART0 = 0;
+//    WritePtrUART0 = 0;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1074,16 +1074,16 @@ void ActivateInterruptsUART1(unsigned onEventFunction) {
     ClearAllPendingInterrupts();
     SetInterruptModeToIRQ();
     AddInterruptMask(BIT_URXD1);
-    if (onEventFunction) {
+//    if (onEventFunction) {
         pISR_URXD1 = onEventFunction;
-        UsePollingUART1 = TRUE;
-    } else {
-        pISR_URXD1 = (unsigned)OnRxUART1;
-        UsePollingUART1 = FALSE;
-    }
+//        UsePollingUART1 = TRUE;
+//    } else {
+//        pISR_URXD1 = (unsigned)OnRxUART1;
+//        UsePollingUART1 = FALSE;
+//    }
     ClearAllPendingInterrupts();
-    ReadPtrUART1 = 0;
-    WritePtrUART1 = 0;
+//    ReadPtrUART1 = 0;
+//    WritePtrUART1 = 0;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1118,33 +1118,33 @@ BOOL HasReceivedDataUART1() {
 //----------------------------------------------------------------------------------------------------
 
 char GetCharUART0() {
-    if (UsePollingUART0) {
+//    if (UsePollingUART0) {
         // The buffer register has a received data:
         while (!(rUTRSTAT0 & 0x1));
         // Return the last received byte:
         return RdURXH0();
-    } else {
-        while (ReadPtrUART0 == WritePtrUART0);
-        char data = BufferUART0[ReadPtrUART0];
-        MOVE_POINTER(ReadPtrUART0);
-        return data;
-    }
+//    } else {
+//        while (ReadPtrUART0 == WritePtrUART0);
+//        char data = BufferUART0[ReadPtrUART0];
+//        MOVE_POINTER(ReadPtrUART0);
+//        return data;
+//    }
 }
 
 //----------------------------------------------------------------------------------------------------
 
 char GetCharUART1() {
-    if (UsePollingUART1) {
+//    if (UsePollingUART1) {
         // The buffer register has a received data:
         while (!(rUTRSTAT1 & 0x1));
         // Return the last received byte:
         return RdURXH1();
-    } else {
-        while (ReadPtrUART1 == WritePtrUART1);
-        char data = BufferUART1[ReadPtrUART1];
-        MOVE_POINTER(ReadPtrUART1);
-        return data;
-    }
+//    } else {
+//        while (ReadPtrUART1 == WritePtrUART1);
+//        char data = BufferUART1[ReadPtrUART1];
+//        MOVE_POINTER(ReadPtrUART1);
+//        return data;
+//    }
 }
 
 //----------------------------------------------------------------------------------------------------

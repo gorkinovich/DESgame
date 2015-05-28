@@ -82,14 +82,12 @@ extern "C" {
 #define W_LIFE 0x40
 #define W_WALL 0x80
 
-#define NO_GENERATED 0xFF
+#define MSG_NEW_GAME  0xFA
+#define MSG_UPDATE    0xFB
+#define MSG_ABORT     0xFD
+#define MSG_TEST      0xFE
 
-#define MSG_NEW_GAME  'N'
-#define MSG_P1_ACTION '1'
-#define MSG_P2_ACTION '2'
-#define MSG_GEN_ENT   'G'
-#define MSG_ABORT     '@'
-#define MSG_TEST      '!'
+#define NO_GENERATED  0xFF
 
 //------------------------------------------------------------
 // Types
@@ -122,7 +120,6 @@ typedef struct {
     UINT32 lastScore;
     BOOL victory;
     BOOL useInput;
-    BOOL useTimer;
     UINT8 updateCount;
 } GameData;
 
@@ -150,12 +147,15 @@ void UpdateOnTimer();
 // Communication
 //------------------------------------------------------------
 
-void SendNewGameMessage();
-void SendPlayerOneActionMessage();
-void SendPlayerTwoActionMessage();
-void SendGeneratedEntityMessage();
-void SendAbortMessage();
-void SendTestMessage();
+BOOL SendByte(char data);
+char ReceiveByte();
+
+void StartUpdateCommunication();
+void FinishUpdateCommunication();
+
+BOOL SendNewGameMessage();
+BOOL SendAbortMessage();
+BOOL SendTestMessage();
 
 void NewGameMessageReceived();
 void UpdateOnReceiveUART();
