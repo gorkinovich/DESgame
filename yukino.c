@@ -33,6 +33,8 @@
 
 #define DEFAULT_DELAY 40
 
+#define SET_REGISTER(r, v) while(r != v) { r = v; }
+
 //----------------------------------------------------------------------------------------------------
 
 void ClearAllPendingInterrupts() {
@@ -54,7 +56,8 @@ void ClearInterruptMask() {
 
 void AddInterruptMask(unsigned mask) {
     // (Page 284, S3C44B0X RISC MICROPROCESSOR, INTERRUPT CONTROLLER)
-    rINTMSK &= ~(BIT_GLOBAL | mask);
+    unsigned value = rINTMSK & ~(BIT_GLOBAL | mask);
+    SET_REGISTER(rINTMSK, value);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -62,8 +65,8 @@ void AddInterruptMask(unsigned mask) {
 void SetInterruptModeToIRQ() {
     // Configures all the lines in IRQ mode & enable the vectorized mode.
     // (Page 280 y 283, S3C44B0X RISC MICROPROCESSOR, INTERRUPT CONTROLLER)
-    rINTMOD = 0x00;
-    rINTCON = 0x01;
+    SET_REGISTER(rINTMOD, 0x00);
+    SET_REGISTER(rINTCON, 0x01);
 }
 
 //****************************************************************************************************
@@ -327,12 +330,15 @@ void InitializeButtonsInterrupts() {
 void SetButtonsAsInterrupt() {
     // Configure the pins & enable the "pull up" in the port G.
     // (Page 230, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
-    rPCONG |= 0xF000; // [PG7, PG6] = 11 -> EINT
-    rPUPG  &= 0x3F;   // [PG7, PG6] =  0 -> Activate
+    unsigned v1 = rPCONG | 0xF000; // [PG7, PG6] = 11 -> EINT
+    unsigned v2 = rPUPG  & 0x3F;   // [PG7, PG6] =  0 -> Activate
     // Configure the invocation mode of the interruption.
     // (Page 232, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
-    rEXTINT = (rEXTINT & 0x00FFFFFF) | 0x22000000;
+    unsigned v3 = (rEXTINT & 0x00FFFFFF) | 0x22000000;
     // [EINT7, EINT6] = 010 -> Int. low level, down flank
+    SET_REGISTER(rPCONG, v1);
+    SET_REGISTER(rPUPG, v2);
+    SET_REGISTER(rEXTINT, v3);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -340,8 +346,10 @@ void SetButtonsAsInterrupt() {
 void SetButtonsAsInput() {
     // Configure the pins & enable the "pull up" in the port G.
     // (Page 230, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
-    rPCONG &= 0x0FFF; // [PG7, PG6] = 00 -> Input
-    rPUPG  &= 0x3F;   // [PG7, PG6] =  0 -> Activate
+    unsigned v1 = rPCONG & 0x0FFF; // [PG7, PG6] = 00 -> Input
+    unsigned v2 = rPUPG  & 0x3F;   // [PG7, PG6] =  0 -> Activate
+    SET_REGISTER(rPCONG, v1);
+    SET_REGISTER(rPUPG, v2);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -423,12 +431,15 @@ void InitializeKeyboardInterrupts() {
 void SetKeyboardAsInterrupt() {
     // Configure the pins & enable the "pull up" in the port G.
     // (Page 230, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
-    rPCONG |= 0x000C; // [PG1] = 11 -> EINT
-    rPUPG  &= 0xFD;   // [PG1] =  0 -> Activate
+    unsigned v1 = rPCONG | 0x000C; // [PG1] = 11 -> EINT
+    unsigned v2 = rPUPG  & 0xFD;   // [PG1] =  0 -> Activate
     // Configure the invocation mode of the interruption.
     // (Page 232, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
-    rEXTINT = (rEXTINT & 0xFFFFFF0F) | 0x00000020;
+    unsigned v3 = (rEXTINT & 0xFFFFFF0F) | 0x00000020;
     // [EINT1] = 010 -> Int. low level, down flank
+    SET_REGISTER(rPCONG, v1);
+    SET_REGISTER(rPUPG, v2);
+    SET_REGISTER(rEXTINT, v3);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -436,8 +447,10 @@ void SetKeyboardAsInterrupt() {
 void SetKeyboardAsInput() {
     // Configure the pins & enable the "pull up" in the port G.
     // (Page 230, S3C44B0X RISC MICROPROCESSOR, I/O PORTS)
-    rPCONG &= 0xFFF3; // [PG1] = 00 -> Input
-    rPUPG  &= 0xFD;   // [PG1] =  0 -> Activate
+    unsigned v1 = rPCONG & 0xFFF3; // [PG1] = 00 -> Input
+    unsigned v2 = rPUPG  & 0xFD;   // [PG1] =  0 -> Activate
+    SET_REGISTER(rPCONG, v1);
+    SET_REGISTER(rPUPG, v2);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -585,7 +598,7 @@ static unsigned char Led8Data = 0;
 
 void Initialize8Led() {
     Led8Data = 0xFF;
-    LED8ADDR = Led8Data;
+    SET_REGISTER(LED8ADDR, Led8Data);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -596,7 +609,7 @@ void Set8Led(unsigned value) {
     } else {
         Led8Data = NumberToSymbol_[value & 0x0F];
     }
-    LED8ADDR = Led8Data;
+    SET_REGISTER(LED8ADDR, Led8Data);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -609,14 +622,14 @@ BOOL IsPoint8Led() {
 
 void SetPoint8Led() {
     Led8Data &= SEGMENT_P;
-    LED8ADDR = Led8Data;
+    SET_REGISTER(LED8ADDR, Led8Data);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void ClearPoint8Led() {
     Led8Data |= ~SEGMENT_P;
-    LED8ADDR = Led8Data;
+    SET_REGISTER(LED8ADDR, Led8Data);
 }
 
 //****************************************************************************************************
@@ -726,23 +739,23 @@ void InitializeLCD() {
     // + The horizontal blanking width: minimum
     // + Delay and pulse width horizontal sync: minimum
     // + Dithering values: by default
-    rLCDCON1   = 0x0000D021;
-    rLCDCON2   = 0x00013CEF;
-    rLCDSADDR1 = 0x16180000;
-    rLCDSADDR2 = 0x00184B00;
-    rLCDSADDR3 = 0x00050;
-    rREDLUT    = 0x0;
-    rBLUELUT   = 0x0;
-    rGREENLUT  = 0x0;
-    rDITHMODE  = 0x12210;
-    rDP1_2     = 0xA5A5;
-    rDP4_7     = 0xBA5DA65;
-    rDP3_5     = 0xA5A5F;
-    rDP2_3     = 0xD6B;
-    rDP5_7     = 0xEB7B5ED;
-    rDP3_4     = 0x77DBE;
-    rDP4_5     = 0x7EBDF;
-    rDP6_7     = 0x7FDFBFE;
+    SET_REGISTER(rLCDCON1, 0x0000D021);
+    SET_REGISTER(rLCDCON2, 0x00013CEF);
+    SET_REGISTER(rLCDSADDR1, 0x16180000);
+    SET_REGISTER(rLCDSADDR2, 0x00184B00);
+    SET_REGISTER(rLCDSADDR3, 0x00050);
+    SET_REGISTER(rREDLUT, 0x0);
+    SET_REGISTER(rBLUELUT, 0x0);
+    SET_REGISTER(rGREENLUT, 0x0);
+    SET_REGISTER(rDITHMODE, 0x12210);
+    SET_REGISTER(rDP1_2, 0xA5A5);
+    SET_REGISTER(rDP4_7, 0xBA5DA65);
+    SET_REGISTER(rDP3_5, 0xA5A5F);
+    SET_REGISTER(rDP2_3, 0xD6B);
+    SET_REGISTER(rDP5_7, 0xEB7B5ED);
+    SET_REGISTER(rDP3_4, 0x77DBE);
+    SET_REGISTER(rDP4_5, 0x7EBDF);
+    SET_REGISTER(rDP6_7, 0x7FDFBFE);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -755,13 +768,15 @@ BOOL IsOnLCD() {
 //----------------------------------------------------------------------------------------------------
 
 void TurnOnLCD() {
-    rLCDCON1 |= 0x00000001;
+    unsigned value = rLCDCON1 | 0x00000001;
+    SET_REGISTER(rLCDCON1, value);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void TurnOffLCD() {
-    rLCDCON1 &= ~(0x00000001);
+    unsigned value = rLCDCON1 & ~(0x00000001);
+    SET_REGISTER(rLCDCON1, value);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1010,12 +1025,12 @@ void InitializeUART0(int bauds) {
     //        Normal operation, Normal transmit, Tx/Rx interrupt request or polling mode
     // UFCON: FIFO disable
     // UMCON: ACF disable, Inactivate nRTS
-    rULCON0 = 0x03;
-    rUCON0  = 0x205;
-    rUFCON0 = 0x00;
-    rUMCON0 = 0x00;
+    SET_REGISTER(rULCON0, 0x03);
+    SET_REGISTER(rUCON0, 0x205);
+    SET_REGISTER(rUFCON0, 0x00);
+    SET_REGISTER(rUMCON0, 0x00);
     // Baud rate divisior register:
-    rUBRDIV0 = ((int) (MCLK / 16.0 / bauds + 0.5) - 1);
+    SET_REGISTER(rUBRDIV0, ((int) (MCLK / 16.0 / bauds + 0.5) - 1));
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1027,12 +1042,12 @@ void InitializeUART1(int bauds) {
     //        Normal operation, Normal transmit, Tx/Rx interrupt request or polling mode
     // UFCON: FIFO disable
     // UMCON: ACF disable, Inactivate nRTS
-    rULCON1 = 0x03;
-    rUCON1  = 0x205;
-    rUFCON1 = 0x00;
-    rUMCON1 = 0x00;
+    SET_REGISTER(rULCON1, 0x03);
+    SET_REGISTER(rUCON1, 0x205);
+    SET_REGISTER(rUFCON1, 0x00);
+    SET_REGISTER(rUMCON1, 0x00);
     // Baud rate divisior register:
-    rUBRDIV1 = ((int) (MCLK / 16.0 / bauds + 0.5) - 1);
+    SET_REGISTER(rUBRDIV1, ((int) (MCLK / 16.0 / bauds + 0.5) - 1));
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1043,6 +1058,7 @@ void ActivateInterruptsUART0(unsigned onEventFunction) {
     AddInterruptMask(BIT_URXD0);
     if (onEventFunction) {
         pISR_URXD0 = onEventFunction;
+        UsePollingUART0 = TRUE;
     } else {
         pISR_URXD0 = (unsigned)OnRxUART0;
         UsePollingUART0 = FALSE;
@@ -1060,6 +1076,7 @@ void ActivateInterruptsUART1(unsigned onEventFunction) {
     AddInterruptMask(BIT_URXD1);
     if (onEventFunction) {
         pISR_URXD1 = onEventFunction;
+        UsePollingUART1 = TRUE;
     } else {
         pISR_URXD1 = (unsigned)OnRxUART1;
         UsePollingUART1 = FALSE;
