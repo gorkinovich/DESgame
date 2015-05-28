@@ -322,7 +322,7 @@ void NewGameMessageReceived() {
 
 //----------------------------------------------------------------------------------------------------
 
-DECL_WITH_IRQ_ATTRIBUTE(UpdateOnReceiveUART);
+//DECL_WITH_IRQ_ATTRIBUTE(UpdateOnReceiveUART);
 
 void UpdateOnReceiveUART() {
     // Get the head of the message:
@@ -368,5 +368,5 @@ void UpdateOnReceiveUART() {
         InitializeGame();
         break;
     }
-    ClearUART1PendingInterrupt();
+    //ClearUART1PendingInterrupt();
 }
