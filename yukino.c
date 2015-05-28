@@ -961,12 +961,14 @@ DECL_WITH_IRQ_ATTRIBUTE(OnRxUART1);
 //----------------------------------------------------------------------------------------------------
 
 void OnRxUART0() {
+    while (!(rUTRSTAT0 & 0x1));
     UINT32 nextPtr = WritePtrUART0;
-    MOVE_POINTER(nextPtr);
-    if (nextPtr != ReadPtrUART0) {
-        WritePtrUART0 = nextPtr;
-        while (!(rUTRSTAT0 & 0x1));
-        BufferUART0[WritePtrUART0] = RdURXH0();
+    while (rUTRSTAT0 & 0x1) {
+		MOVE_POINTER(nextPtr);
+		if (nextPtr != ReadPtrUART0) {
+			WritePtrUART0 = nextPtr;
+        	BufferUART0[WritePtrUART0] = RdURXH0();
+        }
     }
     if (OnReceiveUART_) {
         OnReceiveUART_(0);
@@ -977,12 +979,14 @@ void OnRxUART0() {
 //----------------------------------------------------------------------------------------------------
 
 void OnRxUART1() {
+    while (!(rUTRSTAT1 & 0x1));
     UINT32 nextPtr = WritePtrUART1;
-    MOVE_POINTER(nextPtr);
-    if (nextPtr != ReadPtrUART1) {
-        WritePtrUART1 = nextPtr;
-        while (!(rUTRSTAT1 & 0x1));
-        BufferUART1[WritePtrUART1] = RdURXH1();
+    while (rUTRSTAT1 & 0x1) {
+		MOVE_POINTER(nextPtr);
+		if (nextPtr != ReadPtrUART1) {
+			WritePtrUART1 = nextPtr;
+        	BufferUART1[WritePtrUART1] = RdURXH1();
+        }
     }
     if (OnReceiveUART_) {
         OnReceiveUART_(1);
@@ -995,13 +999,6 @@ void OnRxUART1() {
 void InitializeUART(int bauds) {
     InitializeUART0(bauds);
     InitializeUART1(bauds);
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void ActivateInterruptsUART() {
-    ActivateInterruptsUART0();
-    ActivateInterruptsUART1();
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1023,22 +1020,70 @@ void InitializeUART0(int bauds) {
 
 //----------------------------------------------------------------------------------------------------
 
-void ActivateInterruptsUART0() {
+void InitializeUART1(int bauds) {
+    // Configuration:
+    // ULCON: Normal mode operation, No parity, One stop bit per frame, 8-bits length
+    // UCON:  Tx:Level, Rx:Pulse, Rx time out disable, Rx error status interrupt disable,
+    //        Normal operation, Normal transmit, Tx/Rx interrupt request or polling mode
+    // UFCON: FIFO disable
+    // UMCON: ACF disable, Inactivate nRTS
+    rULCON1 = 0x03;
+    rUCON1  = 0x205;
+    rUFCON1 = 0x00;
+    rUMCON1 = 0x00;
+    // Baud rate divisior register:
+    rUBRDIV1 = ((int) (MCLK / 16.0 / bauds + 0.5) - 1);
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void ActivateInterruptsUART0(unsigned onEventFunction) {
     ClearAllPendingInterrupts();
     SetInterruptModeToIRQ();
     AddInterruptMask(BIT_URXD0);
-    pISR_URXD0 = (unsigned)OnRxUART0;
+    if (onEventFunction) {
+    	pISR_URXD0 = onEventFunction;
+    } else {
+    	pISR_URXD0 = (unsigned)OnRxUART0;
+        UsePollingUART0 = FALSE;
+    }
     ClearAllPendingInterrupts();
-
     ReadPtrUART0 = 0;
     WritePtrUART0 = 0;
-    UsePollingUART0 = FALSE;
 }
+
+//----------------------------------------------------------------------------------------------------
+
+void ActivateInterruptsUART1(unsigned onEventFunction) {
+    ClearAllPendingInterrupts();
+    SetInterruptModeToIRQ();
+    AddInterruptMask(BIT_URXD1);
+    if (onEventFunction) {
+    	pISR_URXD1 = onEventFunction;
+    } else {
+        pISR_URXD1 = (unsigned)OnRxUART1;
+        UsePollingUART1 = FALSE;
+    }
+    ClearAllPendingInterrupts();
+    ReadPtrUART1 = 0;
+    WritePtrUART1 = 0;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void ClearUART0PendingInterrupt() { rI_ISPC = BIT_URXD0; }
+void ClearUART1PendingInterrupt() { rI_ISPC = BIT_URXD1; }
 
 //----------------------------------------------------------------------------------------------------
 
 void WaitTxEmptyUART0() {
     while (!(rUTRSTAT0 & 0x4));
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void WaitTxEmptyUART1() {
+    while (!(rUTRSTAT1 & 0x4));
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1059,102 +1104,6 @@ char GetCharUART0() {
 
 //----------------------------------------------------------------------------------------------------
 
-void SendCharUART0(char victim) {
-    // Wait transmit buffer empty:
-    while (!(rUTRSTAT0 & 0x2));
-    // Send the carriage return when new line:
-    if (victim == LF_CHAR) {
-       WrUTXH0(CR_CHAR);
-    }
-    // Send the data:
-    WrUTXH0(victim);
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void SendStringUART0(char * victim) {
-    while (*victim) {
-        SendCharUART0(*victim++);
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void SendPrintfUART0(char * format, ...) {
-    va_list arg_params;
-    char buffer[512];
-    va_start(arg_params, format);
-    vsprintf(buffer, format, arg_params);
-    SendStringUART0(buffer);
-    va_end(arg_params);
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void GetBufferUART0(char * buffer, unsigned int size) {
-    unsigned int i = 0;
-    while (i < size) {
-        buffer[i++] = GetCharUART0();
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void SendBufferUART0(char * buffer, unsigned int size) {
-    unsigned int i = 0;
-    while (i < size) {
-        SendByteUART0(buffer[i++]);
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void SendByteUART0(char byte) {
-    // Wait transmit buffer empty:
-    while (!(rUTRSTAT0 & 0x2));
-    // Send the data:
-    WrUTXH0(byte);
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void InitializeUART1(int bauds) {
-    // Configuration:
-    // ULCON: Normal mode operation, No parity, One stop bit per frame, 8-bits length
-    // UCON:  Tx:Level, Rx:Pulse, Rx time out disable, Rx error status interrupt disable,
-    //        Normal operation, Normal transmit, Tx/Rx interrupt request or polling mode
-    // UFCON: FIFO disable
-    // UMCON: ACF disable, Inactivate nRTS
-    rULCON1 = 0x03;
-    rUCON1  = 0x205;
-    rUFCON1 = 0x00;
-    rUMCON1 = 0x00;
-    // Baud rate divisior register:
-    rUBRDIV1 = ((int) (MCLK / 16.0 / bauds + 0.5) - 1);
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void ActivateInterruptsUART1() {
-    ClearAllPendingInterrupts();
-    SetInterruptModeToIRQ();
-    AddInterruptMask(BIT_URXD1);
-    pISR_URXD1 = (unsigned)OnRxUART1;
-    ClearAllPendingInterrupts();
-
-    ReadPtrUART1 = 0;
-    WritePtrUART1 = 0;
-    UsePollingUART1 = FALSE;
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void WaitTxEmptyUART1() {
-    while (!(rUTRSTAT1 & 0x4));
-}
-
-//----------------------------------------------------------------------------------------------------
-
 char GetCharUART1() {
     if (UsePollingUART1) {
         // The buffer register has a received data:
@@ -1167,6 +1116,19 @@ char GetCharUART1() {
         MOVE_POINTER(ReadPtrUART1);
         return data;
     }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void SendCharUART0(char victim) {
+    // Wait transmit buffer empty:
+    while (!(rUTRSTAT0 & 0x2));
+    // Send the carriage return when new line:
+    if (victim == LF_CHAR) {
+       WrUTXH0(CR_CHAR);
+    }
+    // Send the data:
+    WrUTXH0(victim);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1184,10 +1146,29 @@ void SendCharUART1(char victim) {
 
 //----------------------------------------------------------------------------------------------------
 
+void SendStringUART0(char * victim) {
+    while (*victim) {
+        SendCharUART0(*victim++);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
 void SendStringUART1(char * victim) {
     while (*victim) {
         SendCharUART1(*victim++);
     }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void SendPrintfUART0(char * format, ...) {
+    va_list arg_params;
+    char buffer[512];
+    va_start(arg_params, format);
+    vsprintf(buffer, format, arg_params);
+    SendStringUART0(buffer);
+    va_end(arg_params);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1203,10 +1184,28 @@ void SendPrintfUART1(char * format, ...) {
 
 //----------------------------------------------------------------------------------------------------
 
+void GetBufferUART0(char * buffer, unsigned int size) {
+    unsigned int i = 0;
+    while (i < size) {
+        buffer[i++] = GetCharUART0();
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
 void GetBufferUART1(char * buffer, unsigned int size) {
     unsigned int i = 0;
     while (i < size) {
         buffer[i++] = GetCharUART1();
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void SendBufferUART0(char * buffer, unsigned int size) {
+    unsigned int i = 0;
+    while (i < size) {
+        SendByteUART0(buffer[i++]);
     }
 }
 
@@ -1217,6 +1216,15 @@ void SendBufferUART1(char * buffer, unsigned int size) {
     while (i < size) {
         SendByteUART1(buffer[i++]);
     }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void SendByteUART0(char byte) {
+    // Wait transmit buffer empty:
+    while (!(rUTRSTAT0 & 0x2));
+    // Send the data:
+    WrUTXH0(byte);
 }
 
 //----------------------------------------------------------------------------------------------------

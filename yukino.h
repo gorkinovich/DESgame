@@ -231,28 +231,30 @@ typedef void (*UARTEventHandler) (unsigned);
 void SetOnReceiveUART(UARTEventHandler value);
 
 void InitializeUART(int bauds);
-void ActivateInterruptsUART();
-
 void InitializeUART0(int bauds);
-void ActivateInterruptsUART0();
-void WaitTxEmptyUART0();
-char GetCharUART0();
-void SendCharUART0(char victim);
-void SendStringUART0(char * victim);
-void SendPrintfUART0(char * format, ...);
-void GetBufferUART0(char * buffer, unsigned int size);
-void SendBufferUART0(char * buffer, unsigned int size);
-void SendByteUART0(char byte);
-
 void InitializeUART1(int bauds);
-void ActivateInterruptsUART1();
+void ActivateInterruptsUART0(unsigned onEventFunction);
+void ActivateInterruptsUART1(unsigned onEventFunction);
+
+void ClearUART0PendingInterrupt();
+void ClearUART1PendingInterrupt();
+
+void WaitTxEmptyUART0();
 void WaitTxEmptyUART1();
+
+char GetCharUART0();
 char GetCharUART1();
+void SendCharUART0(char victim);
 void SendCharUART1(char victim);
+void SendStringUART0(char * victim);
 void SendStringUART1(char * victim);
+void SendPrintfUART0(char * format, ...);
 void SendPrintfUART1(char * format, ...);
+void GetBufferUART0(char * buffer, unsigned int size);
 void GetBufferUART1(char * buffer, unsigned int size);
+void SendBufferUART0(char * buffer, unsigned int size);
 void SendBufferUART1(char * buffer, unsigned int size);
+void SendByteUART0(char byte);
 void SendByteUART1(char byte);
 
 //------------------------------------------------------------
