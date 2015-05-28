@@ -235,6 +235,8 @@ void UpdateOnKeyboard(UINT32 keys) {
             GotoStateScores();
         } else if (keys & KEY_SB09) {
             GotoStateHelp();
+        } else if (keys & KEY_SB04) {
+            SendTestMessage();
         }
     } else if (game_data.state == STATE_NEW_GAME) {
         // The keys used in the new game state:
@@ -311,6 +313,12 @@ void SendAbortMessage() {
 
 //----------------------------------------------------------------------------------------------------
 
+void SendTestMessage() {
+    SendByteUART1(MSG_TEST);
+}
+
+//----------------------------------------------------------------------------------------------------
+
 void NewGameMessageReceived() {
     if (game_data.state == STATE_NEW_GAME) {
         // Go to the game state:
@@ -368,6 +376,13 @@ void UpdateOnReceiveUART() {
         break;
     case MSG_ABORT:
         InitializeGame();
+        break;
+    case MSG_TEST:
+        if (IsPoint8Led()) {
+            ClearPoint8Led();
+        } else {
+            SetPoint8Led();
+        }
         break;
     }
     ClearUART1PendingInterrupt();

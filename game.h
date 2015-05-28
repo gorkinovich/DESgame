@@ -89,6 +89,7 @@ extern "C" {
 #define MSG_P2_ACTION '2'
 #define MSG_GEN_ENT   'G'
 #define MSG_ABORT     '@'
+#define MSG_TEST      '!'
 
 //------------------------------------------------------------
 // Types
@@ -153,6 +154,7 @@ void SendPlayerOneActionMessage();
 void SendPlayerTwoActionMessage();
 void SendGeneratedEntityMessage();
 void SendAbortMessage();
+void SendTestMessage();
 
 void NewGameMessageReceived();
 void UpdateOnReceiveUART();
