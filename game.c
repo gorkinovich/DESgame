@@ -37,6 +37,7 @@ static unsigned int game_seed = 0;
 //****************************************************************************************************
 
 void InitializeGame() {
+	game_data.pause = FALSE;
     InitializeScores();
     InitializeNewGame();
     PlayerOneAsHost();
@@ -138,35 +139,6 @@ void ExecuteAction(UINT8 player, UINT8 action) {
 
 //----------------------------------------------------------------------------------------------------
 
-void UpdatePlayerShoot(UINT8 player) {
-    if (game_data.players[player].lives > 0 && game_data.players[player].shoot.alive) {
-        UINT8 row1 = game_data.players[player].shoot.row;
-        UINT8 col1 = game_data.players[player].shoot.col;
-        UINT8 row2 = row1, col2 = col1;
-        switch (game_data.players[player].shoot.direction) {
-        case DIR_NORTH: --row2; break;
-        case DIR_EAST:  ++col2; break;
-        case DIR_SOUTH: ++row2; break;
-        case DIR_WEST:  --col2; break;
-        }
-        if (IsCellEmpty(row2, col2)) {
-            game_data.players[player].shoot.row = row2;
-            game_data.players[player].shoot.col = col2;
-            game_data.world[row1][col1] = W_EMPT;
-            game_data.world[row2][col2] = W_SHO1;
-            DrawWorldEmpty(row1, col1);
-            DrawWorldShoot(row2, col2);
-        } else {
-            game_data.players[player].shoot.alive = FALSE;
-            game_data.world[row1][col1] = W_EMPT;
-            DrawWorldEmpty(row1, col1);
-            ExterminateAnnihilateDestroy(player, row2, col2);
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
 void PutGeneratedEntity(UINT8 value) {
     UINT8 c = 0, row, col;
     do {
@@ -246,6 +218,20 @@ void StartSignalReceived() {
         // Set this machine as the player 2:
         PlayerTwoAsHost();
     }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void UpdateOnReceiveUART(unsigned value) {
+    //TODO: Complete this function...
+    if (value == 1) {
+        if (game_data.state == STATE_GAME) {
+            //...
+        } else {
+            //...
+        }
+    }
+    //...
 }
 
 //****************************************************************************************************
@@ -356,6 +342,7 @@ void UpdateOnKeyboard(UINT32 keys) {
 //----------------------------------------------------------------------------------------------------
 
 void UpdateOnTimer() {
+    if (game_data.pause) return;
     //TODO: Complete this function...
     if (game_data.state == STATE_GAME) {
         if (game_data.hostPlayer == PLAYER_ONE) {
@@ -364,19 +351,6 @@ void UpdateOnTimer() {
     } else {
         ++game_seed;
     }
-    //...
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void UpdateOnReceiveUART(unsigned value) {
-    //TODO: Complete this function...
-    if (value == 1) {
-        if (game_data.state == STATE_GAME) {
-            //...
-        } else {
-            //...
-        }
-    }
+    ClearTimer0PendingInterrupt();
     //...
 }

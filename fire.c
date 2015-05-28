@@ -96,3 +96,32 @@ void ExecuteActionFire(UINT8 player) {
         }
     }
 }
+
+//----------------------------------------------------------------------------------------------------
+
+void UpdatePlayerShoot(UINT8 player) {
+    if (game_data.players[player].lives > 0 && game_data.players[player].shoot.alive) {
+        UINT8 row1 = game_data.players[player].shoot.row;
+        UINT8 col1 = game_data.players[player].shoot.col;
+        UINT8 row2 = row1, col2 = col1;
+        switch (game_data.players[player].shoot.direction) {
+        case DIR_NORTH: --row2; break;
+        case DIR_EAST:  ++col2; break;
+        case DIR_SOUTH: ++row2; break;
+        case DIR_WEST:  --col2; break;
+        }
+        if (IsCellEmpty(row2, col2)) {
+            game_data.players[player].shoot.row = row2;
+            game_data.players[player].shoot.col = col2;
+            game_data.world[row1][col1] = W_EMPT;
+            game_data.world[row2][col2] = W_SHO1;
+            DrawWorldEmpty(row1, col1);
+            DrawWorldShoot(row2, col2);
+        } else {
+            game_data.players[player].shoot.alive = FALSE;
+            game_data.world[row1][col1] = W_EMPT;
+            DrawWorldEmpty(row1, col1);
+            ExterminateAnnihilateDestroy(player, row2, col2);
+        }
+    }
+}

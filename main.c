@@ -31,7 +31,8 @@
 //****************************************************************************************************
 
 #define MAX_TIME_COUNT 50
-static BOOL PauseGame = FALSE;
+extern GameData game_data;
+DECL_WITH_IRQ_ATTRIBUTE(UpdateOnTimer);
 
 //****************************************************************************************************
 // Input
@@ -44,7 +45,7 @@ void OnButtonDown(unsigned value) {
         InitializeGame();
     } else if (value & BUTTON_RIGHT) {
         TurnOnRightLed();
-        PauseGame = !PauseGame;
+        game_data.pause = !game_data.pause;
     }
 }
 
@@ -61,20 +62,8 @@ void OnButtonUp(unsigned value) {
 //----------------------------------------------------------------------------------------------------
 
 void OnKeyboardDown() {
-    if (PauseGame) return;
+    if (game_data.pause) return;
     UpdateOnKeyboard(GetKeys());
-}
-
-//****************************************************************************************************
-// Timers
-//****************************************************************************************************
-
-DECL_WITH_IRQ_ATTRIBUTE(OnTimer0);
-
-void OnTimer0() {
-    if (PauseGame) return;
-    UpdateOnTimer();
-    ClearTimer0PendingInterrupt();
 }
 
 //****************************************************************************************************
@@ -101,7 +90,7 @@ void Main() {
     InitializeButtonsInterrupts();
 
     // Initialize the timers:
-    SimpleInitializeTimerInterrupts(TIMER_ID0, MAX_TIME_COUNT, (unsigned)OnTimer0);
+    SimpleInitializeTimerInterrupts(TIMER_ID0, MAX_TIME_COUNT, (unsigned)UpdateOnTimer);
 
     // Initialize the UART1:
     SetOnReceiveUART(UpdateOnReceiveUART);

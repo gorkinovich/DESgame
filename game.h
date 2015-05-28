@@ -103,6 +103,7 @@ typedef struct {
 
 typedef struct {
     // General:
+	BOOL pause;
     UINT8 state;
     UINT32 scores[MAX_SCORES];
     // Current game:
@@ -129,7 +130,6 @@ void DecEntityCount();
 void PlayerQuitOneLife(UINT8 player);
 void PlayerAddScore(UINT8 player, UINT32 value);
 void ExecuteAction(UINT8 player, UINT8 action);
-void UpdatePlayerShoot(UINT8 player);
 void PutGeneratedEntity(UINT8 value);
 void UpdateEntityGenerator();
 void UpdateGame();
@@ -141,6 +141,7 @@ void UpdateGame();
 void SendStartSignal();
 void SendAbortSignal();
 void StartSignalReceived();
+void UpdateOnReceiveUART(unsigned value);
 
 //------------------------------------------------------------
 // States
@@ -154,7 +155,6 @@ void GotoStateScores();
 void GotoStateHelp();
 void UpdateOnKeyboard(UINT32 keys);
 void UpdateOnTimer();
-void UpdateOnReceiveUART(unsigned value);
 
 //------------------------------------------------------------
 // Fire
@@ -162,6 +162,7 @@ void UpdateOnReceiveUART(unsigned value);
 
 void ExterminateAnnihilateDestroy(UINT8 player, UINT8 row, UINT8 col);
 void ExecuteActionFire(UINT8 player);
+void UpdatePlayerShoot(UINT8 player);
 
 //------------------------------------------------------------
 // Move
