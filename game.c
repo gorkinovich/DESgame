@@ -61,6 +61,7 @@ void InitializeNewGame() {
     game_data.lastScore = 0;
     game_data.victory = FALSE;
     game_data.useInput = TRUE;
+    game_data.useTimer = TRUE;
     game_data.updateCount = 0;
     srand(game_seed);
 }
@@ -263,9 +264,9 @@ DECL_WITH_IRQ_ATTRIBUTE(UpdateOnTimer);
 void UpdateOnTimer() {
     if (game_data.pause) return;
     if (game_data.state == STATE_GAME) {
-        if (game_data.hostPlayer == PLAYER_ONE) {
+        if (game_data.hostPlayer == PLAYER_ONE && game_data.useTimer) {
             SendPlayerOneActionMessage();
-            return;
+            game_data.useTimer = FALSE;
         }
     } else {
         ++game_seed;
@@ -359,7 +360,7 @@ void UpdateOnReceiveUART() {
             game_data.remoteAction = param1;
             UpdateGame();
             SendGeneratedEntityMessage();
-            ClearTimer0PendingInterrupt();
+            game_data.useTimer = TRUE;
         }
         break;
     case MSG_GEN_ENT:

@@ -122,6 +122,7 @@ typedef struct {
     UINT32 lastScore;
     BOOL victory;
     BOOL useInput;
+    BOOL useTimer;
     UINT8 updateCount;
 } GameData;
 
