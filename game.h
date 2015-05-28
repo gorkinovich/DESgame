@@ -84,6 +84,12 @@ extern "C" {
 
 #define NO_GENERATED 0xFF
 
+#define MSG_NEW_GAME  'N'
+#define MSG_P1_ACTION '1'
+#define MSG_P2_ACTION '2'
+#define MSG_GEN_ENT   'G'
+#define MSG_ABORT     '@'
+
 //------------------------------------------------------------
 // Types
 //------------------------------------------------------------
@@ -103,7 +109,7 @@ typedef struct {
 
 typedef struct {
     // General:
-	BOOL pause;
+    BOOL pause;
     UINT8 state;
     UINT32 scores[MAX_SCORES];
     // Current game:
@@ -114,6 +120,7 @@ typedef struct {
     UINT8 hostPlayer, entityCount;
     UINT32 lastScore;
     BOOL victory;
+    BOOL useInput;
 } GameData;
 
 //------------------------------------------------------------
@@ -133,28 +140,21 @@ void ExecuteAction(UINT8 player, UINT8 action);
 void PutGeneratedEntity(UINT8 value);
 void UpdateEntityGenerator();
 void UpdateGame();
+void UpdateOnKeyboard(UINT32 keys);
+void UpdateOnTimer();
 
 //------------------------------------------------------------
 // Communication
 //------------------------------------------------------------
 
-void SendStartSignal();
-void SendAbortSignal();
-void StartSignalReceived();
-void UpdateOnReceiveUART(unsigned value);
+void SendNewGameMessage();
+void SendPlayerOneActionMessage();
+void SendPlayerTwoActionMessage();
+void SendGeneratedEntityMessage();
+void SendAbortMessage();
 
-//------------------------------------------------------------
-// States
-//------------------------------------------------------------
-
-void GotoStateMenu();
-void GotoStateNewGame();
-void GotoStateGame();
-void GotoStateGameOver();
-void GotoStateScores();
-void GotoStateHelp();
-void UpdateOnKeyboard(UINT32 keys);
-void UpdateOnTimer();
+void NewGameMessageReceived();
+void UpdateOnReceiveUART();
 
 //------------------------------------------------------------
 // Fire
@@ -173,6 +173,17 @@ void ExecuteActionEast(UINT8 player);
 void ExecuteActionSouth(UINT8 player);
 void ExecuteActionWest(UINT8 player);
 void ExecuteActionMove(UINT8 player, UINT8 row1, UINT8 col1, UINT8 row2, UINT8 col2);
+
+//------------------------------------------------------------
+// States
+//------------------------------------------------------------
+
+void GotoStateMenu();
+void GotoStateNewGame();
+void GotoStateGame();
+void GotoStateGameOver();
+void GotoStateScores();
+void GotoStateHelp();
 
 //------------------------------------------------------------
 // Render

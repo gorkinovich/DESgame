@@ -964,10 +964,10 @@ void OnRxUART0() {
     while (!(rUTRSTAT0 & 0x1));
     UINT32 nextPtr = WritePtrUART0;
     while (rUTRSTAT0 & 0x1) {
-		MOVE_POINTER(nextPtr);
-		if (nextPtr != ReadPtrUART0) {
-			WritePtrUART0 = nextPtr;
-        	BufferUART0[WritePtrUART0] = RdURXH0();
+        MOVE_POINTER(nextPtr);
+        if (nextPtr != ReadPtrUART0) {
+            WritePtrUART0 = nextPtr;
+            BufferUART0[WritePtrUART0] = RdURXH0();
         }
     }
     if (OnReceiveUART_) {
@@ -982,10 +982,10 @@ void OnRxUART1() {
     while (!(rUTRSTAT1 & 0x1));
     UINT32 nextPtr = WritePtrUART1;
     while (rUTRSTAT1 & 0x1) {
-		MOVE_POINTER(nextPtr);
-		if (nextPtr != ReadPtrUART1) {
-			WritePtrUART1 = nextPtr;
-        	BufferUART1[WritePtrUART1] = RdURXH1();
+        MOVE_POINTER(nextPtr);
+        if (nextPtr != ReadPtrUART1) {
+            WritePtrUART1 = nextPtr;
+            BufferUART1[WritePtrUART1] = RdURXH1();
         }
     }
     if (OnReceiveUART_) {
@@ -1042,9 +1042,9 @@ void ActivateInterruptsUART0(unsigned onEventFunction) {
     SetInterruptModeToIRQ();
     AddInterruptMask(BIT_URXD0);
     if (onEventFunction) {
-    	pISR_URXD0 = onEventFunction;
+        pISR_URXD0 = onEventFunction;
     } else {
-    	pISR_URXD0 = (unsigned)OnRxUART0;
+        pISR_URXD0 = (unsigned)OnRxUART0;
         UsePollingUART0 = FALSE;
     }
     ClearAllPendingInterrupts();
@@ -1059,7 +1059,7 @@ void ActivateInterruptsUART1(unsigned onEventFunction) {
     SetInterruptModeToIRQ();
     AddInterruptMask(BIT_URXD1);
     if (onEventFunction) {
-    	pISR_URXD1 = onEventFunction;
+        pISR_URXD1 = onEventFunction;
     } else {
         pISR_URXD1 = (unsigned)OnRxUART1;
         UsePollingUART1 = FALSE;

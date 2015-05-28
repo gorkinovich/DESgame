@@ -94,18 +94,23 @@ void ExecuteActionWest(UINT8 player) {
 void ExecuteActionMove(UINT8 player, UINT8 row1, UINT8 col1, UINT8 row2, UINT8 col2) {
     BOOL move = FALSE;
     if (game_data.world[row2][col2] == W_EMPT) {
+        // Move in an empty space:
         move = TRUE;
     } else if (game_data.world[row2][col2] == W_LIFE) {
+        // Move inside a cell with a life inside of it:
         move = TRUE;
+        // Update the player data:
         if (game_data.players[player].lives < MAX_LIVES_COUNT) {
             game_data.players[player].lives++;
         } else {
             PlayerAddScore(player, SCORE_LIFE);
         }
+        // Update the entity count and the HUD:
         DecEntityCount();
         DrawGameScoreAndLives();
     }
     if (move) {
+        // Move the player from the old cell to the new one:
         game_data.world[row2][col2] = game_data.world[row1][col1];
         game_data.world[row1][col1] = W_EMPT;
         DrawWorlCell(row1, col1);

@@ -37,7 +37,7 @@ static unsigned int game_seed = 0;
 //****************************************************************************************************
 
 void InitializeGame() {
-	game_data.pause = FALSE;
+    game_data.pause = FALSE;
     InitializeScores();
     InitializeNewGame();
     PlayerOneAsHost();
@@ -59,6 +59,7 @@ void InitializeNewGame() {
     game_data.entityCount = 0;
     game_data.lastScore = 0;
     game_data.victory = FALSE;
+    game_data.useInput = TRUE;
     srand(game_seed);
 }
 
@@ -191,126 +192,23 @@ void UpdateGame() {
     }
 }
 
-//****************************************************************************************************
-// Communication
-//****************************************************************************************************
-
-void SendStartSignal() {
-    //TODO: Complete this function...
-    //...
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void SendAbortSignal() {
-    //TODO: Complete this function...
-    //...
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void StartSignalReceived() {
-    if (game_data.state == STATE_NEW_GAME) {
-        // Go to the game state:
-        GotoStateGame();
-    } else if (game_data.state == STATE_MENU || game_data.state == STATE_SCORES ||
-        game_data.state == STATE_HELP || game_data.state == STATE_GAME_OVER) {
-        // Set this machine as the player 2:
-        PlayerTwoAsHost();
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void UpdateOnReceiveUART(unsigned value) {
-    //TODO: Complete this function...
-    if (value == 1) {
-        if (game_data.state == STATE_GAME) {
-            //...
-        } else {
-            //...
-        }
-    }
-    //...
-}
-
-//****************************************************************************************************
-// States
-//****************************************************************************************************
-
-void GotoStateMenu() {
-    // Change the current state & draw the screen:
-    game_data.state = STATE_MENU;
-    DrawMenu();
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void GotoStateNewGame() {
-    if (game_data.hostPlayer == PLAYER_ONE) {
-        // Change the current state, send the star signal to the player 2 & draw the screen:
-        game_data.state = STATE_NEW_GAME;
-        SendStartSignal();
-        DrawNewGame();
-    } else {
-        // Send the start signal to the player 1 & go to the game state:
-        SendStartSignal();
-        GotoStateGame();
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void GotoStateGame() {
-    // Change the current state, initialize a new game & draw the screen:
-    game_data.state = STATE_GAME;
-    InitializeNewGame();
-    DrawGame();
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void GotoStateGameOver() {
-    // Set if there is a victory or not, add the score & reset the host player:
-    game_data.victory = game_data.players[game_data.hostPlayer].lives > 0;
-    if (game_data.victory) { AddScore(game_data.lastScore); }
-    PlayerOneAsHost();
-    // Change the current state & draw the screen:
-    game_data.state = STATE_GAME_OVER;
-    DrawGameOver();
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void GotoStateScores() {
-    // Change the current state & draw the screen:
-    game_data.state = STATE_SCORES;
-    DrawScores();
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void GotoStateHelp() {
-    // Change the current state & draw the screen:
-    game_data.state = STATE_HELP;
-    DrawHelp();
-}
-
 //----------------------------------------------------------------------------------------------------
 
 void UpdateOnKeyboard(UINT32 keys) {
     if (game_data.state == STATE_GAME) {
-        // The keys used in the game state:
-        if (keys & KEY_SB06) {
-            game_data.lastAction = ACTION_FIRE;
-        } else if (keys & KEY_SB05) {
-            game_data.lastAction = ACTION_NORTH;
-        } else if (keys & KEY_SB07) {
-            game_data.lastAction = ACTION_SOUTH;
-        } else if (keys & KEY_SB02) {
-            game_data.lastAction = ACTION_WEST;
-        } else if (keys & KEY_SB10) {
-            game_data.lastAction = ACTION_EAST;
+        if (game_data.useInput) {
+            // The keys used in the game state:
+            if (keys & KEY_SB06) {
+                game_data.lastAction = ACTION_FIRE;
+            } else if (keys & KEY_SB05) {
+                game_data.lastAction = ACTION_NORTH;
+            } else if (keys & KEY_SB07) {
+                game_data.lastAction = ACTION_SOUTH;
+            } else if (keys & KEY_SB02) {
+                game_data.lastAction = ACTION_WEST;
+            } else if (keys & KEY_SB10) {
+                game_data.lastAction = ACTION_EAST;
+            }
         }
     } else if (game_data.state == STATE_MENU) {
         // The keys used in the menu state:
@@ -324,7 +222,7 @@ void UpdateOnKeyboard(UINT32 keys) {
     } else if (game_data.state == STATE_NEW_GAME) {
         // The keys used in the new game state:
         if (keys & KEY_SB16) {
-            SendAbortSignal();
+            SendAbortMessage();
             GotoStateMenu();
         }
     } else if (game_data.state == STATE_GAME_OVER) {
@@ -353,4 +251,93 @@ void UpdateOnTimer() {
     }
     ClearTimer0PendingInterrupt();
     //...
+}
+
+//****************************************************************************************************
+// Communication
+//****************************************************************************************************
+
+void SendNewGameMessage() {
+    SendByteUART1(MSG_NEW_GAME);
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void SendPlayerOneActionMessage() {
+    SendByteUART1(MSG_P1_ACTION);
+    SendByteUART1(game_data.lastAction);
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void SendPlayerTwoActionMessage() {
+    SendByteUART1(MSG_P2_ACTION);
+    SendByteUART1(game_data.lastAction);
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void SendGeneratedEntityMessage() {
+    SendByteUART1(MSG_GEN_ENT);
+    SendByteUART1(game_data.lastGenRow);
+    SendByteUART1(game_data.lastGenCol);
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void SendAbortMessage() {
+    SendByteUART1(MSG_ABORT);
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void NewGameMessageReceived() {
+    if (game_data.state == STATE_NEW_GAME) {
+        // Go to the game state:
+        GotoStateGame();
+    } else if (game_data.state == STATE_MENU || game_data.state == STATE_SCORES ||
+        game_data.state == STATE_HELP || game_data.state == STATE_GAME_OVER) {
+        // Set this machine as the player 2:
+        PlayerTwoAsHost();
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void UpdateOnReceiveUART() {
+    // Get the head of the message:
+    char type = GetCharUART1();
+    char param1, param2;
+    // Check the type of the message:
+    switch (type) {
+    case MSG_NEW_GAME:
+        NewGameMessageReceived();
+        break;
+    case MSG_P1_ACTION:
+        param1 = GetCharUART1();
+        if (game_data.hostPlayer == PLAYER_TWO) {
+            //TODO: Complete this function...
+            //...
+        }
+        break;
+    case MSG_P2_ACTION:
+        param1 = GetCharUART1();
+        if (game_data.hostPlayer == PLAYER_ONE) {
+            //TODO: Complete this function...
+            //...
+        }
+        break;
+    case MSG_GEN_ENT:
+        param1 = GetCharUART1();
+        param2 = GetCharUART1();
+        if (game_data.hostPlayer == PLAYER_TWO) {
+            //TODO: Complete this function...
+            //...
+        }
+        break;
+    case MSG_ABORT:
+        InitializeGame();
+        break;
+    }
+    ClearUART1PendingInterrupt();
 }

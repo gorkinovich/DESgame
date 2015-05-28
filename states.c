@@ -20,82 +20,75 @@
 // SOFTWARE.
 //****************************************************************************************************
 
-#include "44b.h"
-#include "44blib.h"
-#include "stdio.h"
-#include "yukino.h"
 #include "game.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 //****************************************************************************************************
-// Logic
+// Data
 //****************************************************************************************************
 
-#define MAX_TIME_COUNT 50
 extern GameData game_data;
-DECL_WITH_IRQ_ATTRIBUTE(UpdateOnTimer);
-DECL_WITH_IRQ_ATTRIBUTE(UpdateOnReceiveUART);
 
 //****************************************************************************************************
-// Input
+// States
 //****************************************************************************************************
 
-void OnButtonDown(unsigned value) {
-    if (value & BUTTON_LEFT) {
-        TurnOnLeftLed();
-        ResetScores();
-        InitializeGame();
-    } else if (value & BUTTON_RIGHT) {
-        TurnOnRightLed();
-        game_data.pause = !game_data.pause;
+void GotoStateMenu() {
+    // Change the current state & draw the screen:
+    game_data.state = STATE_MENU;
+    DrawMenu();
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void GotoStateNewGame() {
+    if (game_data.hostPlayer == PLAYER_ONE) {
+        // Change the current state, send the star signal to the player 2 & draw the screen:
+        game_data.state = STATE_NEW_GAME;
+        SendNewGameMessage();
+        DrawNewGame();
+    } else {
+        // Send the start signal to the player 1 & go to the game state:
+        SendNewGameMessage();
+        GotoStateGame();
     }
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void OnButtonUp(unsigned value) {
-    if (value & BUTTON_LEFT) {
-        TurnOffLeftLed();
-    } else if (value & BUTTON_RIGHT) {
-        TurnOffRightLed();
-    }
+void GotoStateGame() {
+    // Change the current state, initialize a new game & draw the screen:
+    game_data.state = STATE_GAME;
+    InitializeNewGame();
+    DrawGame();
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void OnKeyboardDown() {
-    if (game_data.pause) return;
-    UpdateOnKeyboard(GetKeys());
+void GotoStateGameOver() {
+    // Set if there is a victory or not, add the score & reset the host player:
+    game_data.victory = game_data.players[game_data.hostPlayer].lives > 0;
+    if (game_data.victory) { AddScore(game_data.lastScore); }
+    PlayerOneAsHost();
+    // Change the current state & draw the screen:
+    game_data.state = STATE_GAME_OVER;
+    DrawGameOver();
 }
 
-//****************************************************************************************************
-// Main entry:
-//****************************************************************************************************
+//----------------------------------------------------------------------------------------------------
 
-void Main() {
-    // Initialize the system:
-    sys_init();
-    InitializeSystem();
+void GotoStateScores() {
+    // Change the current state & draw the screen:
+    game_data.state = STATE_SCORES;
+    DrawScores();
+}
 
-    // Initialize the output:
-    TurnOnLCD();
-    Set8Led(0);
+//----------------------------------------------------------------------------------------------------
 
-    // Initialize the data:
-    InitializeGame();
-
-    // Initialize the input:
-    SetOnKeyboardDown(OnKeyboardDown);
-    InitializeKeyboardInterrupts();
-    SetOnButtonDown(OnButtonDown);
-    SetOnButtonUp(OnButtonUp);
-    InitializeButtonsInterrupts();
-
-    // Initialize the timers:
-    SimpleInitializeTimerInterrupts(TIMER_ID0, MAX_TIME_COUNT, (unsigned)UpdateOnTimer);
-
-    // Initialize the UART1:
-    InitializeUART(BAUDS_115200);
-    ActivateInterruptsUART1((unsigned)UpdateOnReceiveUART);
-
-    while (1);
+void GotoStateHelp() {
+    // Change the current state & draw the screen:
+    game_data.state = STATE_HELP;
+    DrawHelp();
 }
