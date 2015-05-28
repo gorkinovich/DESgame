@@ -88,12 +88,14 @@ void InitializePlayer(UINT8 player) {
 
 void PlayerOneAsHost() {
     game_data.hostPlayer = PLAYER_ONE;
+    Set8Led(1);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void PlayerTwoAsHost() {
     game_data.hostPlayer = PLAYER_TWO;
+    Set8Led(2);
 }
 
 //----------------------------------------------------------------------------------------------------
