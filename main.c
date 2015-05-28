@@ -109,8 +109,8 @@ void Main() {
 
     // Initialize the UART1:
     InitializeUART(BAUDS_115200);
-    //ActivateInterruptsUART1((unsigned)UpdateOnReceiveUART);
+    ActivateInterruptsUART1((unsigned)UpdateOnReceiveUART);
 
     // Call the main loop:
-    MainLoopWithPolling();
+    MainLoop();
 }
