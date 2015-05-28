@@ -65,6 +65,16 @@ void OnKeyboardDown() {
     UpdateOnKeyboard(GetKeys());
 }
 
+//----------------------------------------------------------------------------------------------------
+
+void MainLoopWithPolling() {
+	while (1) {
+        if (HasReceivedDataUART1()) {
+            UpdateOnReceiveUART();
+        }
+    }
+}
+
 //****************************************************************************************************
 // Main entry:
 //****************************************************************************************************
@@ -93,11 +103,8 @@ void Main() {
 
     // Initialize the UART1:
     InitializeUART(BAUDS_115200);
-    //ActivateInterruptsUART1((unsigned)UpdateOnReceiveUART);
+    ActivateInterruptsUART1((unsigned)UpdateOnReceiveUART);
 
-    while (1) {
-        if (HasReceivedDataUART1()) {
-            UpdateOnReceiveUART();
-        }
-    }
+    while (1);
+    //MainLoopWithPolling()
 }
