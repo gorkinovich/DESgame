@@ -60,8 +60,8 @@ void GotoStateNewGame() {
 
 void GotoStateGame() {
     // Change the current state, initialize a new game & draw the screen:
-    game_data.state = STATE_GAME;
     InitializeNewGame();
+    game_data.state = STATE_GAME;
     DrawGame();
 }
 
