@@ -32,8 +32,6 @@
 
 #define MAX_TIME_COUNT 50
 extern GameData game_data;
-DECL_WITH_IRQ_ATTRIBUTE(UpdateOnTimer);
-DECL_WITH_IRQ_ATTRIBUTE(UpdateOnReceiveUART);
 
 //****************************************************************************************************
 // Input

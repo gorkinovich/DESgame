@@ -254,6 +254,8 @@ void UpdateOnKeyboard(UINT32 keys) {
 
 //----------------------------------------------------------------------------------------------------
 
+DECL_WITH_IRQ_ATTRIBUTE(UpdateOnTimer);
+
 void UpdateOnTimer() {
     if (game_data.pause) return;
     if (game_data.state == STATE_GAME) {
@@ -319,6 +321,8 @@ void NewGameMessageReceived() {
 }
 
 //----------------------------------------------------------------------------------------------------
+
+DECL_WITH_IRQ_ATTRIBUTE(UpdateOnReceiveUART);
 
 void UpdateOnReceiveUART() {
     // Get the head of the message:

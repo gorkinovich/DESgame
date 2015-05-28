@@ -65,7 +65,7 @@ void AddScore(UINT32 score) {
 void ResetScores() {
     UINT16 i;
     for (i = 0; i < AT24C04_DEPTH; ++i) {
-        at24c04_bytewrite(i, 0);
+        //at24c04_bytewrite(i, 0);
     }
 }
 
@@ -77,7 +77,7 @@ void SaveScores() {
         UINT32 value = game_data.scores[i];
         UINT8 * bytes = (UINT8 *)&value;
         for (j = 0; j < sizeof(UINT32); ++j, ++k) {
-            at24c04_bytewrite(k, bytes[j]);
+            //at24c04_bytewrite(k, bytes[j]);
         }
     }
 }
@@ -90,7 +90,7 @@ void LoadScores() {
         UINT32 value = 0;
         UINT8 * bytes = (UINT8 *)&value;
         for (j = 0; j < sizeof(UINT32); ++j, ++k) {
-            at24c04_byteread(k, &bytes[j]);
+            //at24c04_byteread(k, &bytes[j]);
         }
         game_data.scores[i] = value;
     }
