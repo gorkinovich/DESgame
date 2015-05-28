@@ -1023,11 +1023,11 @@ void InitializeUART0(int bauds) {
     // ULCON: Normal mode operation, No parity, One stop bit per frame, 8-bits length
     // UCON:  Tx:Level, Rx:Pulse, Rx time out disable, Rx error status interrupt disable,
     //        Normal operation, Normal transmit, Tx/Rx interrupt request or polling mode
-    // UFCON: FIFO enable
+    // UFCON: FIFO disable
     // UMCON: ACF disable, Inactivate nRTS
     SET_REGISTER(rULCON0, 0x03);
     SET_REGISTER(rUCON0, 0x205);
-    SET_REGISTER(rUFCON0, 0x01);
+    SET_REGISTER(rUFCON0, 0x00);
     SET_REGISTER(rUMCON0, 0x00);
     // Baud rate divisior register:
     SET_REGISTER(rUBRDIV0, ((int) (MCLK / 16.0 / bauds + 0.5) - 1));
@@ -1040,11 +1040,11 @@ void InitializeUART1(int bauds) {
     // ULCON: Normal mode operation, No parity, One stop bit per frame, 8-bits length
     // UCON:  Tx:Level, Rx:Pulse, Rx time out disable, Rx error status interrupt disable,
     //        Normal operation, Normal transmit, Tx/Rx interrupt request or polling mode
-    // UFCON: FIFO enable
+    // UFCON: FIFO disable
     // UMCON: ACF disable, Inactivate nRTS
     SET_REGISTER(rULCON1, 0x03);
     SET_REGISTER(rUCON1, 0x205);
-    SET_REGISTER(rUFCON1, 0x01);
+    SET_REGISTER(rUFCON1, 0x00);
     SET_REGISTER(rUMCON1, 0x00);
     // Baud rate divisior register:
     SET_REGISTER(rUBRDIV1, ((int) (MCLK / 16.0 / bauds + 0.5) - 1));

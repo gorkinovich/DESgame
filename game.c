@@ -333,8 +333,6 @@ void NewGameMessageReceived() {
 
 //----------------------------------------------------------------------------------------------------
 
-DECL_WITH_IRQ_ATTRIBUTE(UpdateOnReceiveUART);
-
 void UpdateOnReceiveUART() {
     // Get the head of the message:
     char type = GetCharUART1();
@@ -386,5 +384,13 @@ void UpdateOnReceiveUART() {
         }
         break;
     }
+}
+
+//----------------------------------------------------------------------------------------------------
+
+DECL_WITH_IRQ_ATTRIBUTE(OnReceiveUART);
+
+void OnReceiveUART() {
+    UpdateOnReceiveUART();
     ClearUART1PendingInterrupt();
 }

@@ -159,6 +159,7 @@ void SendTestMessage();
 
 void NewGameMessageReceived();
 void UpdateOnReceiveUART();
+void OnReceiveUART();
 
 //------------------------------------------------------------
 // Fire
