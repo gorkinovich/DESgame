@@ -54,6 +54,7 @@ void InitializeNewGame() {
     }
     game_data.lastGenRow = NO_GENERATED;
     game_data.lastGenCol = NO_GENERATED;
+    game_data.lastGenVal = NO_GENERATED;
     game_data.lastAction = ACTION_NONE;
     game_data.remoteAction = ACTION_NONE;
     game_data.entityCount = 0;
@@ -151,6 +152,7 @@ void PutGeneratedEntity(UINT8 value) {
             DrawWorlCell(row, col);
             game_data.lastGenRow = row;
             game_data.lastGenCol = col;
+            game_data.lastGenVal = value;
             return;
         } else {
             ++c;
@@ -161,15 +163,28 @@ void PutGeneratedEntity(UINT8 value) {
 //----------------------------------------------------------------------------------------------------
 
 void UpdateEntityGenerator() {
-    game_data.lastGenRow = NO_GENERATED;
-    game_data.lastGenCol = NO_GENERATED;
-    if (game_data.entityCount < MAX_ENTITY_COUNT) {
-        int victim = rand() % 1000;
-        if (victim <= 10) {
-            PutGeneratedEntity(W_LIFE);
-        } else if (victim <= 200) {
-            PutGeneratedEntity(W_SOL1);
+    if (game_data.hostPlayer == PLAYER_ONE) {
+        game_data.lastGenRow = NO_GENERATED;
+        game_data.lastGenCol = NO_GENERATED;
+        game_data.lastGenVal = NO_GENERATED;
+        if (game_data.entityCount < MAX_ENTITY_COUNT) {
+            int victim = rand() % 1000;
+            if (victim <= 10) {
+                PutGeneratedEntity(W_LIFE);
+            } else if (victim <= 200) {
+                PutGeneratedEntity(W_SOL1);
+            }
         }
+    } else if (game_data.hostPlayer == PLAYER_TWO && game_data.lastGenRow != NO_GENERATED &&
+            game_data.lastGenCol != NO_GENERATED && game_data.lastGenVal != NO_GENERATED) {
+        UINT8 row = game_data.lastGenRow;
+        UINT8 col = game_data.lastGenCol;
+        game_data.entityCount++;
+        game_data.world[row][col] = game_data.lastGenVal;
+        DrawWorlCell(row, col);
+        game_data.lastGenRow = NO_GENERATED;
+        game_data.lastGenCol = NO_GENERATED;
+        game_data.lastGenVal = NO_GENERATED;
     }
 }
 
@@ -241,16 +256,13 @@ void UpdateOnKeyboard(UINT32 keys) {
 
 void UpdateOnTimer() {
     if (game_data.pause) return;
-    //TODO: Complete this function...
     if (game_data.state == STATE_GAME) {
         if (game_data.hostPlayer == PLAYER_ONE) {
-            UpdateGame();
+            SendPlayerOneActionMessage();
         }
     } else {
         ++game_seed;
     }
-    ClearTimer0PendingInterrupt();
-    //...
 }
 
 //****************************************************************************************************
@@ -281,6 +293,7 @@ void SendGeneratedEntityMessage() {
     SendByteUART1(MSG_GEN_ENT);
     SendByteUART1(game_data.lastGenRow);
     SendByteUART1(game_data.lastGenCol);
+    SendByteUART1(game_data.lastGenVal);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -307,7 +320,7 @@ void NewGameMessageReceived() {
 void UpdateOnReceiveUART() {
     // Get the head of the message:
     char type = GetCharUART1();
-    char param1, param2;
+    char param1, param2, param3;
     // Check the type of the message:
     switch (type) {
     case MSG_NEW_GAME:
@@ -316,23 +329,30 @@ void UpdateOnReceiveUART() {
     case MSG_P1_ACTION:
         param1 = GetCharUART1();
         if (game_data.hostPlayer == PLAYER_TWO) {
-            //TODO: Complete this function...
-            //...
+            game_data.useInput = FALSE;
+            game_data.remoteAction = param1;
+            SendPlayerTwoActionMessage();
         }
         break;
     case MSG_P2_ACTION:
         param1 = GetCharUART1();
         if (game_data.hostPlayer == PLAYER_ONE) {
-            //TODO: Complete this function...
-            //...
+            game_data.remoteAction = param1;
+            UpdateGame();
+            SendGeneratedEntityMessage();
+            ClearTimer0PendingInterrupt();
         }
         break;
     case MSG_GEN_ENT:
         param1 = GetCharUART1();
         param2 = GetCharUART1();
+        param3 = GetCharUART1();
         if (game_data.hostPlayer == PLAYER_TWO) {
-            //TODO: Complete this function...
-            //...
+            game_data.lastGenRow = param1;
+            game_data.lastGenCol = param2;
+            game_data.lastGenVal = param3;
+            UpdateGame();
+            game_data.useInput = TRUE;
         }
         break;
     case MSG_ABORT:

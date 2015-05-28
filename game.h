@@ -115,7 +115,7 @@ typedef struct {
     // Current game:
     UINT8 world[MAX_ROWS][MAX_COLS];
     Player players[MAX_PLAYERS];
-    UINT8 lastGenRow, lastGenCol;
+    UINT8 lastGenRow, lastGenCol, lastGenVal;
     UINT8 lastAction, remoteAction;
     UINT8 hostPlayer, entityCount;
     UINT32 lastScore;
