@@ -226,6 +226,10 @@ INT32 Print2LCD(UINT16 x, UINT16 y, UINT8 color, const char * format, ...);
 #define LF_CHAR 0x0A
 #define CR_CHAR 0x0D
 
+typedef void (*UARTEventHandler) (unsigned);
+
+void SetOnReceiveUART(UARTEventHandler value);
+
 void InitializeUART(int bauds);
 void ActivateInterruptsUART();
 

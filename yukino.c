@@ -936,7 +936,15 @@ INT32 Print2LCD(UINT16 x, UINT16 y, UINT8 color, const char * format, ...) {
 // UART
 //****************************************************************************************************
 
+static UARTEventHandler OnReceiveUART_ = NULLPTR;
+
+void SetOnReceiveUART(UARTEventHandler value) { OnReceiveUART_ = value; }
+
+//----------------------------------------------------------------------------------------------------
+
 #define UART_BUFFER_SIZE 256
+
+#define MOVE_POINTER(ptr) ptr = (ptr + 1) % UART_BUFFER_SIZE
 
 static BOOL UsePollingUART0 = TRUE;
 static BOOL UsePollingUART1 = TRUE;
@@ -950,8 +958,6 @@ static volatile UINT32 WritePtrUART1 = 0;
 DECL_WITH_IRQ_ATTRIBUTE(OnRxUART0);
 DECL_WITH_IRQ_ATTRIBUTE(OnRxUART1);
 
-#define MOVE_POINTER(ptr) ptr = (ptr + 1) % UART_BUFFER_SIZE
-
 //----------------------------------------------------------------------------------------------------
 
 void OnRxUART0() {
@@ -961,6 +967,9 @@ void OnRxUART0() {
 		WritePtrUART0 = nextPtr;
 		while (!(rUTRSTAT0 & 0x1));
 		BufferUART0[WritePtrUART0] = RdURXH0();
+	}
+	if (OnReceiveUART_) {
+		OnReceiveUART_(0);
 	}
     rI_ISPC = BIT_URXD0;
 }
@@ -974,6 +983,9 @@ void OnRxUART1() {
 		WritePtrUART1 = nextPtr;
 		while (!(rUTRSTAT1 & 0x1));
 		BufferUART1[WritePtrUART1] = RdURXH1();
+	}
+	if (OnReceiveUART_) {
+		OnReceiveUART_(1);
 	}
     rI_ISPC = BIT_URXD1;
 }
