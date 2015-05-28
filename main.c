@@ -93,7 +93,11 @@ void Main() {
 
     // Initialize the UART1:
     InitializeUART(BAUDS_115200);
-    ActivateInterruptsUART1((unsigned)UpdateOnReceiveUART);
+    //ActivateInterruptsUART1((unsigned)UpdateOnReceiveUART);
 
-    while (1);
+    while (1) {
+        if (HasReceivedDataUART1()) {
+            UpdateOnReceiveUART();
+        }
+    }
 }

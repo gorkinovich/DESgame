@@ -195,7 +195,7 @@ void UpdateGame() {
     UpdatePlayerShoot(PLAYER_ONE);
     UpdatePlayerShoot(PLAYER_TWO);
     if (game_data.updateCount >= MAX_UPDATE_COUNT) {
-    	game_data.updateCount = 0;
+        game_data.updateCount = 0;
         ExecuteAction(game_data.hostPlayer, game_data.lastAction);
         game_data.lastAction = ACTION_NONE;
         UINT8 remotePlayer = GetOppositePlayer(game_data.hostPlayer);

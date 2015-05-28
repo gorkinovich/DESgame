@@ -241,6 +241,8 @@ void ClearUART1PendingInterrupt();
 
 void WaitTxEmptyUART0();
 void WaitTxEmptyUART1();
+BOOL HasReceivedDataUART0();
+BOOL HasReceivedDataUART1();
 
 char GetCharUART0();
 char GetCharUART1();
