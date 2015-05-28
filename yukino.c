@@ -598,7 +598,7 @@ static unsigned char Led8Data = 0;
 
 void Initialize8Led() {
     Led8Data = 0xFF;
-    SET_REGISTER(LED8ADDR, Led8Data);
+    LED8ADDR = Led8Data;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -609,7 +609,7 @@ void Set8Led(unsigned value) {
     } else {
         Led8Data = NumberToSymbol_[value & 0x0F];
     }
-    SET_REGISTER(LED8ADDR, Led8Data);
+    LED8ADDR = Led8Data;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -622,14 +622,14 @@ BOOL IsPoint8Led() {
 
 void SetPoint8Led() {
     Led8Data &= SEGMENT_P;
-    SET_REGISTER(LED8ADDR, Led8Data);
+    LED8ADDR = Led8Data;
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void ClearPoint8Led() {
     Led8Data |= ~SEGMENT_P;
-    SET_REGISTER(LED8ADDR, Led8Data);
+    LED8ADDR = Led8Data;
 }
 
 //****************************************************************************************************
@@ -753,7 +753,7 @@ void InitializeLCD() {
     SET_REGISTER(rDP3_5, 0xA5A5F);
     SET_REGISTER(rDP2_3, 0xD6B);
     SET_REGISTER(rDP5_7, 0xEB7B5ED);
-    SET_REGISTER(rDP3_4, 0x77DBE);
+    SET_REGISTER(rDP3_4, 0x7DBE);
     SET_REGISTER(rDP4_5, 0x7EBDF);
     SET_REGISTER(rDP6_7, 0x7FDFBFE);
 }
