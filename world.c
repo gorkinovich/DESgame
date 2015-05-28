@@ -85,6 +85,21 @@ BOOL IsCellEmptyOrPickable(UINT8 row, UINT8 col) {
 
 //----------------------------------------------------------------------------------------------------
 
+void FindPlayerPosition(UINT8 player, UINT8 wid) {
+    UINT8 i, j;
+    for (i = 0; i < MAX_ROWS; ++i) {
+        for (j = 0; j < MAX_COLS; ++j) {
+            if (game_data.world[i][j] == wid) {
+                game_data.players[player].row = i;
+                game_data.players[player].col = j;
+                return;
+            }
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
 void DrawWorlCell(UINT8 row, UINT8 col) {
     UINT8 victim = game_data.world[row][col];
     switch (victim) {

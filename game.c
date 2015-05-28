@@ -51,6 +51,8 @@ void InitializeNewGame() {
     for (i = 0; i < MAX_PLAYERS; ++i) {
         InitializePlayer(i);
     }
+    game_data.lastGenRow = NO_GENERATED;
+    game_data.lastGenCol = NO_GENERATED;
     game_data.lastAction = ACTION_NONE;
     game_data.remoteAction = ACTION_NONE;
     game_data.entityCount = 0;
@@ -80,27 +82,6 @@ void InitializePlayer(UINT8 player) {
 
 //----------------------------------------------------------------------------------------------------
 
-void FindPlayerPosition(UINT8 player, UINT8 wid) {
-    UINT8 i, j;
-    for (i = 0; i < MAX_ROWS; ++i) {
-        for (j = 0; j < MAX_COLS; ++j) {
-            if (game_data.world[i][j] == wid) {
-                game_data.players[player].row = i;
-                game_data.players[player].col = j;
-                return;
-            }
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-UINT8 GetOppositePlayer(UINT8 victim) {
-    return victim == PLAYER_ONE ? PLAYER_TWO : PLAYER_ONE;
-}
-
-//----------------------------------------------------------------------------------------------------
-
 void PlayerOneAsHost() {
     game_data.hostPlayer = PLAYER_ONE;
 }
@@ -109,6 +90,14 @@ void PlayerOneAsHost() {
 
 void PlayerTwoAsHost() {
     game_data.hostPlayer = PLAYER_TWO;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void DecEntityCount() {
+    if (game_data.entityCount > 0) {
+        game_data.entityCount--;
+    }
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -130,160 +119,6 @@ void PlayerAddScore(UINT8 player, UINT32 value) {
     if (game_data.hostPlayer == player) {
         game_data.lastScore += value;
         DrawGameScoreAndLives();
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void ExterminateAnnihilateDestroy(UINT8 player, UINT8 row, UINT8 col) {
-    switch (game_data.world[row][col]) {
-    case W_PLA1:
-        if (player == PLAYER_TWO) {
-            PlayerAddScore(player, SCORE_PLAYER);
-            PlayerQuitOneLife(PLAYER_ONE);
-        }
-        break;
-    case W_PLA2:
-        if (player == PLAYER_ONE) {
-            PlayerAddScore(player, SCORE_PLAYER);
-            PlayerQuitOneLife(PLAYER_TWO);
-        }
-        break;
-    case W_SHO1:
-    case W_SHO2:
-        game_data.players[PLAYER_ONE].shoot.alive = FALSE;
-        game_data.players[PLAYER_TWO].shoot.alive = FALSE;
-        ClearWorldCell(row, col);
-        break;
-    case W_SOL1:
-        if (game_data.entityCount > 0) {
-            game_data.entityCount--;
-        }
-        PlayerAddScore(player, SCORE_SOLDIER1);
-        ClearWorldCell(row, col);
-        break;
-    case W_SOL2:
-        if (game_data.entityCount > 0) {
-            game_data.entityCount--;
-        }
-        PlayerAddScore(player, SCORE_SOLDIER2);
-        ClearWorldCell(row, col);
-        break;
-    case W_LIFE:
-        if (game_data.entityCount > 0) {
-            game_data.entityCount--;
-        }
-        ClearWorldCell(row, col);
-        break;
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void ExecuteActionFire(UINT8 player) {
-    if (!game_data.players[player].shoot.alive) {
-        UINT8 row = game_data.players[player].row;
-        UINT8 col = game_data.players[player].col;
-        switch (game_data.players[player].direction) {
-        case DIR_NORTH: --row; break;
-        case DIR_EAST:  ++col; break;
-        case DIR_SOUTH: ++row; break;
-        case DIR_WEST:  --col; break;
-        }
-        if (IsCellEmpty(row, col)) {
-            game_data.players[player].shoot.alive = TRUE;
-            game_data.players[player].shoot.direction = game_data.players[player].direction;
-            game_data.players[player].shoot.row = row;
-            game_data.players[player].shoot.col = col;
-            game_data.world[row][col] = W_SHO1;
-            DrawWorldShoot(row, col);
-        } else {
-            ExterminateAnnihilateDestroy(player, row, col);
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void ExecuteActionNorth(UINT8 player) {
-    if (game_data.players[player].direction == DIR_NORTH) {
-        UINT8 row1 = game_data.players[player].row;
-        UINT8 col1 = game_data.players[player].col;
-        UINT8 row2 = row1 - 1, col2 = col1;
-        ExecuteActionMove(player, row1, col1, row2, col2);
-    } else {
-        game_data.players[player].direction = DIR_NORTH;
-        RedrawWorldPlayer(player);
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void ExecuteActionEast(UINT8 player) {
-    if (game_data.players[player].direction == DIR_EAST) {
-        UINT8 row1 = game_data.players[player].row;
-        UINT8 col1 = game_data.players[player].col;
-        UINT8 row2 = row1, col2 = col1 + 1;
-        ExecuteActionMove(player, row1, col1, row2, col2);
-    } else {
-        game_data.players[player].direction = DIR_EAST;
-        RedrawWorldPlayer(player);
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void ExecuteActionSouth(UINT8 player) {
-    if (game_data.players[player].direction == DIR_SOUTH) {
-        UINT8 row1 = game_data.players[player].row;
-        UINT8 col1 = game_data.players[player].col;
-        UINT8 row2 = row1 + 1, col2 = col1;
-        ExecuteActionMove(player, row1, col1, row2, col2);
-    } else {
-        game_data.players[player].direction = DIR_SOUTH;
-        RedrawWorldPlayer(player);
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void ExecuteActionWest(UINT8 player) {
-    if (game_data.players[player].direction == DIR_WEST) {
-        UINT8 row1 = game_data.players[player].row;
-        UINT8 col1 = game_data.players[player].col;
-        UINT8 row2 = row1, col2 = col1 - 1;
-        ExecuteActionMove(player, row1, col1, row2, col2);
-    } else {
-        game_data.players[player].direction = DIR_WEST;
-        RedrawWorldPlayer(player);
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void ExecuteActionMove(UINT8 player, UINT8 row1, UINT8 col1, UINT8 row2, UINT8 col2) {
-    BOOL move = FALSE;
-    if (game_data.world[row2][col2] == W_EMPT) {
-        move = TRUE;
-    } else if (game_data.world[row2][col2] == W_LIFE) {
-        move = TRUE;
-        if (game_data.players[player].lives < MAX_LIVES_COUNT) {
-            game_data.players[player].lives++;
-        } else {
-            PlayerAddScore(player, SCORE_LIFE);
-        }
-        if (game_data.entityCount > 0) {
-            game_data.entityCount--;
-        }
-        DrawGameScoreAndLives();
-    }
-    if (move) {
-        game_data.world[row2][col2] = game_data.world[row1][col1];
-        game_data.world[row1][col1] = W_EMPT;
-        DrawWorlCell(row1, col1);
-        DrawWorlCell(row2, col2);
-        game_data.players[player].row = row2;
-        game_data.players[player].col = col2;
     }
 }
 
@@ -341,6 +176,8 @@ void PutGeneratedEntity(UINT8 value) {
             game_data.entityCount++;
             game_data.world[row][col] = value;
             DrawWorlCell(row, col);
+            game_data.lastGenRow = row;
+            game_data.lastGenCol = col;
             return;
         } else {
             ++c;
@@ -351,6 +188,8 @@ void PutGeneratedEntity(UINT8 value) {
 //----------------------------------------------------------------------------------------------------
 
 void UpdateEntityGenerator() {
+    game_data.lastGenRow = NO_GENERATED;
+    game_data.lastGenCol = NO_GENERATED;
     if (game_data.entityCount < MAX_ENTITY_COUNT) {
         int victim = rand() % 1000;
         if (victim <= 10) {
@@ -385,6 +224,13 @@ void UpdateGame() {
 //****************************************************************************************************
 
 void SendStartSignal() {
+    //TODO: Complete this function...
+    //...
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void SendAbortSignal() {
     //TODO: Complete this function...
     //...
 }
@@ -468,6 +314,7 @@ void GotoStateHelp() {
 
 void UpdateOnKeyboard(UINT32 keys) {
     if (game_data.state == STATE_GAME) {
+        // The keys used in the game state:
         if (keys & KEY_SB06) {
             game_data.lastAction = ACTION_FIRE;
         } else if (keys & KEY_SB05) {
@@ -480,6 +327,7 @@ void UpdateOnKeyboard(UINT32 keys) {
             game_data.lastAction = ACTION_EAST;
         }
     } else if (game_data.state == STATE_MENU) {
+        // The keys used in the menu state:
         if (keys & KEY_SB01) {
             GotoStateNewGame();
         } else if (keys & KEY_SB05) {
@@ -488,14 +336,19 @@ void UpdateOnKeyboard(UINT32 keys) {
             GotoStateHelp();
         }
     } else if (game_data.state == STATE_NEW_GAME) {
+        // The keys used in the new game state:
         if (keys & KEY_SB16) {
+            SendAbortSignal();
             GotoStateMenu();
         }
     } else if (game_data.state == STATE_GAME_OVER) {
+        // The keys used in the game over state:
         GotoStateMenu();
     } else if (game_data.state == STATE_SCORES) {
+        // The keys used in the scores state:
         GotoStateMenu();
     } else if (game_data.state == STATE_HELP) {
+        // The keys used in the help state:
         GotoStateMenu();
     }
 }

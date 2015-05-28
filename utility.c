@@ -52,3 +52,9 @@ char * IntToStringWithFormat(UINT32 value, const char * format) {
     sprintf(buffer, format, value);
     return buffer;
 }
+
+//----------------------------------------------------------------------------------------------------
+
+UINT8 GetOppositePlayer(UINT8 victim) {
+    return victim == PLAYER_ONE ? PLAYER_TWO : PLAYER_ONE;
+}

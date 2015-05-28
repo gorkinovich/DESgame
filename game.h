@@ -82,6 +82,8 @@ extern "C" {
 #define W_LIFE 0x40
 #define W_WALL 0x80
 
+#define NO_GENERATED 0xFF
+
 //------------------------------------------------------------
 // Types
 //------------------------------------------------------------
@@ -106,6 +108,7 @@ typedef struct {
     // Current game:
     UINT8 world[MAX_ROWS][MAX_COLS];
     Player players[MAX_PLAYERS];
+    UINT8 lastGenRow, lastGenCol;
     UINT8 lastAction, remoteAction;
     UINT8 hostPlayer, entityCount;
     UINT32 lastScore;
@@ -119,20 +122,12 @@ typedef struct {
 void InitializeGame();
 void InitializeNewGame();
 void InitializePlayer(UINT8 player);
-void FindPlayerPosition(UINT8 player, UINT8 wid);
-UINT8 GetOppositePlayer(UINT8 victim);
 void PlayerOneAsHost();
 void PlayerTwoAsHost();
+void DecEntityCount();
 
 void PlayerQuitOneLife(UINT8 player);
 void PlayerAddScore(UINT8 player, UINT32 value);
-void ExterminateAnnihilateDestroy(UINT8 player, UINT8 row, UINT8 col);
-void ExecuteActionFire(UINT8 player);
-void ExecuteActionNorth(UINT8 player);
-void ExecuteActionEast(UINT8 player);
-void ExecuteActionSouth(UINT8 player);
-void ExecuteActionWest(UINT8 player);
-void ExecuteActionMove(UINT8 player, UINT8 row1, UINT8 col1, UINT8 row2, UINT8 col2);
 void ExecuteAction(UINT8 player, UINT8 action);
 void UpdatePlayerShoot(UINT8 player);
 void PutGeneratedEntity(UINT8 value);
@@ -144,6 +139,7 @@ void UpdateGame();
 //------------------------------------------------------------
 
 void SendStartSignal();
+void SendAbortSignal();
 void StartSignalReceived();
 
 //------------------------------------------------------------
@@ -159,6 +155,23 @@ void GotoStateHelp();
 void UpdateOnKeyboard(UINT32 keys);
 void UpdateOnTimer();
 void UpdateOnReceiveUART(unsigned value);
+
+//------------------------------------------------------------
+// Fire
+//------------------------------------------------------------
+
+void ExterminateAnnihilateDestroy(UINT8 player, UINT8 row, UINT8 col);
+void ExecuteActionFire(UINT8 player);
+
+//------------------------------------------------------------
+// Move
+//------------------------------------------------------------
+
+void ExecuteActionNorth(UINT8 player);
+void ExecuteActionEast(UINT8 player);
+void ExecuteActionSouth(UINT8 player);
+void ExecuteActionWest(UINT8 player);
+void ExecuteActionMove(UINT8 player, UINT8 row1, UINT8 col1, UINT8 row2, UINT8 col2);
 
 //------------------------------------------------------------
 // Render
@@ -195,6 +208,7 @@ void LoadScores();
 void InitializeWorld();
 BOOL IsCellEmpty(UINT8 row, UINT8 col);
 BOOL IsCellEmptyOrPickable(UINT8 row, UINT8 col);
+void FindPlayerPosition(UINT8 player, UINT8 wid);
 void DrawWorlCell(UINT8 row, UINT8 col);
 void DrawWorldPlayer1(UINT8 row, UINT8 col);
 void DrawWorldPlayer2(UINT8 row, UINT8 col);
@@ -214,6 +228,7 @@ char * IntToString(UINT32 value);
 char * IntToString3(UINT32 value);
 char * IntToString10(UINT32 value);
 char * IntToStringWithFormat(UINT32 value, const char * format);
+UINT8 GetOppositePlayer(UINT8 victim);
 
 #ifdef __cplusplus
 }

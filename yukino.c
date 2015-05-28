@@ -961,47 +961,47 @@ DECL_WITH_IRQ_ATTRIBUTE(OnRxUART1);
 //----------------------------------------------------------------------------------------------------
 
 void OnRxUART0() {
-	UINT32 nextPtr = WritePtrUART0;
-	MOVE_POINTER(nextPtr);
-	if (nextPtr != ReadPtrUART0) {
-		WritePtrUART0 = nextPtr;
-		while (!(rUTRSTAT0 & 0x1));
-		BufferUART0[WritePtrUART0] = RdURXH0();
-	}
-	if (OnReceiveUART_) {
-		OnReceiveUART_(0);
-	}
+    UINT32 nextPtr = WritePtrUART0;
+    MOVE_POINTER(nextPtr);
+    if (nextPtr != ReadPtrUART0) {
+        WritePtrUART0 = nextPtr;
+        while (!(rUTRSTAT0 & 0x1));
+        BufferUART0[WritePtrUART0] = RdURXH0();
+    }
+    if (OnReceiveUART_) {
+        OnReceiveUART_(0);
+    }
     rI_ISPC = BIT_URXD0;
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void OnRxUART1() {
-	UINT32 nextPtr = WritePtrUART1;
-	MOVE_POINTER(nextPtr);
-	if (nextPtr != ReadPtrUART1) {
-		WritePtrUART1 = nextPtr;
-		while (!(rUTRSTAT1 & 0x1));
-		BufferUART1[WritePtrUART1] = RdURXH1();
-	}
-	if (OnReceiveUART_) {
-		OnReceiveUART_(1);
-	}
+    UINT32 nextPtr = WritePtrUART1;
+    MOVE_POINTER(nextPtr);
+    if (nextPtr != ReadPtrUART1) {
+        WritePtrUART1 = nextPtr;
+        while (!(rUTRSTAT1 & 0x1));
+        BufferUART1[WritePtrUART1] = RdURXH1();
+    }
+    if (OnReceiveUART_) {
+        OnReceiveUART_(1);
+    }
     rI_ISPC = BIT_URXD1;
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void InitializeUART(int bauds) {
-	InitializeUART0(bauds);
-	InitializeUART1(bauds);
+    InitializeUART0(bauds);
+    InitializeUART1(bauds);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void ActivateInterruptsUART() {
-	ActivateInterruptsUART0();
-	ActivateInterruptsUART1();
+    ActivateInterruptsUART0();
+    ActivateInterruptsUART1();
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1030,52 +1030,52 @@ void ActivateInterruptsUART0() {
     pISR_URXD0 = (unsigned)OnRxUART0;
     ClearAllPendingInterrupts();
 
-	ReadPtrUART0 = 0;
-	WritePtrUART0 = 0;
-	UsePollingUART0 = FALSE;
+    ReadPtrUART0 = 0;
+    WritePtrUART0 = 0;
+    UsePollingUART0 = FALSE;
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void WaitTxEmptyUART0() {
-	while (!(rUTRSTAT0 & 0x4));
+    while (!(rUTRSTAT0 & 0x4));
 }
 
 //----------------------------------------------------------------------------------------------------
 
 char GetCharUART0() {
-	if (UsePollingUART0) {
-		// The buffer register has a received data:
-		while (!(rUTRSTAT0 & 0x1));
-		// Return the last received byte:
-		return RdURXH0();
-	} else {
-		while (ReadPtrUART0 == WritePtrUART0);
-		char data = BufferUART0[ReadPtrUART0];
-		MOVE_POINTER(ReadPtrUART0);
-		return data;
-	}
+    if (UsePollingUART0) {
+        // The buffer register has a received data:
+        while (!(rUTRSTAT0 & 0x1));
+        // Return the last received byte:
+        return RdURXH0();
+    } else {
+        while (ReadPtrUART0 == WritePtrUART0);
+        char data = BufferUART0[ReadPtrUART0];
+        MOVE_POINTER(ReadPtrUART0);
+        return data;
+    }
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendCharUART0(char victim) {
-	// Wait transmit buffer empty:
-	while (!(rUTRSTAT0 & 0x2));
-	// Send the carriage return when new line:
+    // Wait transmit buffer empty:
+    while (!(rUTRSTAT0 & 0x2));
+    // Send the carriage return when new line:
     if (victim == LF_CHAR) {
-	   WrUTXH0(CR_CHAR);
-	}
+       WrUTXH0(CR_CHAR);
+    }
     // Send the data:
-	WrUTXH0(victim);
+    WrUTXH0(victim);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendStringUART0(char * victim) {
-	while (*victim) {
-		SendCharUART0(*victim++);
-	}
+    while (*victim) {
+        SendCharUART0(*victim++);
+    }
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1092,28 +1092,28 @@ void SendPrintfUART0(char * format, ...) {
 //----------------------------------------------------------------------------------------------------
 
 void GetBufferUART0(char * buffer, unsigned int size) {
-	unsigned int i = 0;
-	while (i < size) {
-		buffer[i++] = GetCharUART0();
-	}
+    unsigned int i = 0;
+    while (i < size) {
+        buffer[i++] = GetCharUART0();
+    }
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendBufferUART0(char * buffer, unsigned int size) {
-	unsigned int i = 0;
-	while (i < size) {
-		SendByteUART0(buffer[i++]);
-	}
+    unsigned int i = 0;
+    while (i < size) {
+        SendByteUART0(buffer[i++]);
+    }
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendByteUART0(char byte) {
-	// Wait transmit buffer empty:
-	while (!(rUTRSTAT0 & 0x2));
+    // Wait transmit buffer empty:
+    while (!(rUTRSTAT0 & 0x2));
     // Send the data:
-	WrUTXH0(byte);
+    WrUTXH0(byte);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1142,52 +1142,52 @@ void ActivateInterruptsUART1() {
     pISR_URXD1 = (unsigned)OnRxUART1;
     ClearAllPendingInterrupts();
 
-	ReadPtrUART1 = 0;
-	WritePtrUART1 = 0;
-	UsePollingUART1 = FALSE;
+    ReadPtrUART1 = 0;
+    WritePtrUART1 = 0;
+    UsePollingUART1 = FALSE;
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void WaitTxEmptyUART1() {
-	while (!(rUTRSTAT1 & 0x4));
+    while (!(rUTRSTAT1 & 0x4));
 }
 
 //----------------------------------------------------------------------------------------------------
 
 char GetCharUART1() {
-	if (UsePollingUART1) {
-		// The buffer register has a received data:
-		while (!(rUTRSTAT1 & 0x1));
-		// Return the last received byte:
-		return RdURXH1();
-	} else {
-		while (ReadPtrUART1 == WritePtrUART1);
-		char data = BufferUART1[ReadPtrUART1];
-		MOVE_POINTER(ReadPtrUART1);
-		return data;
-	}
+    if (UsePollingUART1) {
+        // The buffer register has a received data:
+        while (!(rUTRSTAT1 & 0x1));
+        // Return the last received byte:
+        return RdURXH1();
+    } else {
+        while (ReadPtrUART1 == WritePtrUART1);
+        char data = BufferUART1[ReadPtrUART1];
+        MOVE_POINTER(ReadPtrUART1);
+        return data;
+    }
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendCharUART1(char victim) {
-	// Wait transmit buffer empty:
-	while (!(rUTRSTAT1 & 0x2));
-	// Send the carriage return when new line:
+    // Wait transmit buffer empty:
+    while (!(rUTRSTAT1 & 0x2));
+    // Send the carriage return when new line:
     if (victim == LF_CHAR) {
-	   WrUTXH1(CR_CHAR);
-	}
+       WrUTXH1(CR_CHAR);
+    }
     // Send the data:
-	WrUTXH1(victim);
+    WrUTXH1(victim);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendStringUART1(char * victim) {
-	while (*victim) {
-		SendCharUART1(*victim++);
-	}
+    while (*victim) {
+        SendCharUART1(*victim++);
+    }
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1204,28 +1204,28 @@ void SendPrintfUART1(char * format, ...) {
 //----------------------------------------------------------------------------------------------------
 
 void GetBufferUART1(char * buffer, unsigned int size) {
-	unsigned int i = 0;
-	while (i < size) {
-		buffer[i++] = GetCharUART1();
-	}
+    unsigned int i = 0;
+    while (i < size) {
+        buffer[i++] = GetCharUART1();
+    }
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendBufferUART1(char * buffer, unsigned int size) {
-	unsigned int i = 0;
-	while (i < size) {
-		SendByteUART1(buffer[i++]);
-	}
+    unsigned int i = 0;
+    while (i < size) {
+        SendByteUART1(buffer[i++]);
+    }
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void SendByteUART1(char byte) {
-	// Wait transmit buffer empty:
-	while (!(rUTRSTAT1 & 0x2));
+    // Wait transmit buffer empty:
+    while (!(rUTRSTAT1 & 0x2));
     // Send the data:
-	WrUTXH1(byte);
+    WrUTXH1(byte);
 }
 
 //****************************************************************************************************
