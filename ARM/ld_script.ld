@@ -1,5 +1,7 @@
 SECTIONS
 {
+	. = 0x0C300000;
+	.lcdbuffer : { *(.lcdbuffer) }
 	. = 0x0C000000;
 	Image_RO_Base = .;
 	.text : { *(.text) }
@@ -16,8 +18,6 @@ SECTIONS
 	__EH_FRAME_BEGIN__ = .;
 	__EH_FRAME_END__ = .;
 PROVIDE (__stack = .);
-	. = 0x0C300000;
-	.lcdbuffer : { *(.lcdbuffer) }
 	end = .;
 	_end = .;
 	.debug_info     0 : { *(.debug_info)  }

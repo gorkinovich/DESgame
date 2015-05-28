@@ -75,6 +75,12 @@ void MainLoopWithPolling() {
     }
 }
 
+//----------------------------------------------------------------------------------------------------
+
+void MainLoop() {
+	while (1);
+}
+
 //****************************************************************************************************
 // Main entry:
 //****************************************************************************************************
@@ -103,8 +109,8 @@ void Main() {
 
     // Initialize the UART1:
     InitializeUART(BAUDS_115200);
-    ActivateInterruptsUART1((unsigned)UpdateOnReceiveUART);
+    //ActivateInterruptsUART1((unsigned)UpdateOnReceiveUART);
 
-    while (1);
-    //MainLoopWithPolling()
+    // Call the main loop:
+    MainLoopWithPolling();
 }
