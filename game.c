@@ -26,37 +26,6 @@
 #include <stdio.h>
 
 //****************************************************************************************************
-// Constants
-//****************************************************************************************************
-
-#define MAX_UPDATE_COUNT 1
-#define MAX_ENTITY_COUNT 2
-#define MAX_LIVES_COUNT  200
-
-#define SCORE_SOLDIER1 8
-#define SCORE_SOLDIER2 16
-#define SCORE_PLAYER   32
-#define SCORE_LIFE     64
-
-#define CELL_WIDTH  16
-#define CELL_HEIGHT 16
-
-#define W_EMPT 0x00
-#define W_PLA1 0x01
-#define W_PLA2 0x02
-#define W_SHO1 0x04
-#define W_SHO2 0x08
-#define W_SOL1 0x10
-#define W_SOL2 0x20
-#define W_LIFE 0x40
-#define W_WALL 0x80
-
-#define CL_WH LCD_COLOR_WHITE
-#define CL_LG LCD_COLOR_LIGHTGRAY
-#define CL_DG LCD_COLOR_DARKGRAY
-#define CL_BL LCD_COLOR_BLACK
-
-//****************************************************************************************************
 // Data
 //****************************************************************************************************
 
@@ -140,113 +109,6 @@ void PlayerOneAsHost() {
 
 void PlayerTwoAsHost() {
     game_data.hostPlayer = PLAYER_TWO;
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGame() {
-    UINT8 i, j;
-    for (i = 0; i < MAX_ROWS; ++i) {
-        for (j = 0; j < MAX_COLS; ++j) {
-            DrawWorlCell(i, j);
-        }
-    }
-    PutStringLCD(0, 224, LCD_COLOR_BLACK, "Score:");
-    PutStringLCD(240, 224, LCD_COLOR_BLACK, "Lives:");
-    DrawGameScoreAndLives();
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGameScoreAndLives() {
-    PutStringLCD(56, 224, LCD_COLOR_BLACK, IntToString10(game_data.lastScore));
-    PutStringLCD(296, 224, LCD_COLOR_BLACK, IntToString3(game_data.players[game_data.hostPlayer].lives));
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGameSprite(UINT16 x, UINT16 y, const UINT8 * data) {
-    INT8 i, j;
-    UINT16 k = 0;
-    for (i = 0; i < CELL_HEIGHT; ++i) {
-        for (j = 0; j < CELL_WIDTH; ++j, ++k) {
-            PutPixelLCD(x + j, y + i, data[k]);
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGameSprite90(UINT16 x, UINT16 y, const UINT8 * data) {
-    INT8 i, j;
-    UINT16 k = 0;
-    for (j = CELL_WIDTH - 1; j >= 0; --j) {
-        for (i = 0; i < CELL_HEIGHT; ++i, ++k) {
-            PutPixelLCD(x + j, y + i, data[k]);
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGameSprite180(UINT16 x, UINT16 y, const UINT8 * data) {
-    INT8 i, j;
-    UINT16 k = 0;
-    for (i = CELL_HEIGHT - 1; i >= 0; --i) {
-        for (j = CELL_WIDTH - 1; j >= 0; --j, ++k) {
-            PutPixelLCD(x + j, y + i, data[k]);
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGameSprite270(UINT16 x, UINT16 y, const UINT8 * data) {
-    INT8 i, j;
-    UINT16 k = 0;
-    for (j = 0; j < CELL_WIDTH; ++j) {
-        for (i = CELL_HEIGHT - 1; i >= 0; --i, ++k) {
-            PutPixelLCD(x + j, y + i, data[k]);
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawWorldPlayer(UINT8 row, UINT8 col, UINT8 player, const UINT8 * data) {
-    if (player < MAX_PLAYERS) {
-        switch (game_data.players[player].direction) {
-        case DIR_EAST:
-            DrawGameSprite90(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-            break;
-        case DIR_SOUTH:
-            DrawGameSprite180(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-            break;
-        case DIR_WEST:
-            DrawGameSprite270(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-            break;
-        default:
-            DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-            break;
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void RedrawPlayer(UINT8 player) {
-    if (player == PLAYER_ONE) {
-        DrawWorldPlayer1(game_data.players[player].row, game_data.players[player].col);
-    } else {
-        DrawWorldPlayer2(game_data.players[player].row, game_data.players[player].col);
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void ClearWorldCell(UINT8 row, UINT8 col) {
-    game_data.world[row][col] = W_EMPT;
-    DrawWorlCell(row, col);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -351,7 +213,7 @@ void ExecuteActionNorth(UINT8 player) {
         ExecuteActionMove(player, row1, col1, row2, col2);
     } else {
         game_data.players[player].direction = DIR_NORTH;
-        RedrawPlayer(player);
+        RedrawWorldPlayer(player);
     }
 }
 
@@ -365,7 +227,7 @@ void ExecuteActionEast(UINT8 player) {
         ExecuteActionMove(player, row1, col1, row2, col2);
     } else {
         game_data.players[player].direction = DIR_EAST;
-        RedrawPlayer(player);
+        RedrawWorldPlayer(player);
     }
 }
 
@@ -379,7 +241,7 @@ void ExecuteActionSouth(UINT8 player) {
         ExecuteActionMove(player, row1, col1, row2, col2);
     } else {
         game_data.players[player].direction = DIR_SOUTH;
-        RedrawPlayer(player);
+        RedrawWorldPlayer(player);
     }
 }
 
@@ -393,7 +255,7 @@ void ExecuteActionWest(UINT8 player) {
         ExecuteActionMove(player, row1, col1, row2, col2);
     } else {
         game_data.players[player].direction = DIR_WEST;
-        RedrawPlayer(player);
+        RedrawWorldPlayer(player);
     }
 }
 
@@ -531,9 +393,11 @@ void SendStartSignal() {
 
 void StartSignalReceived() {
     if (game_data.state == STATE_NEW_GAME) {
+        // Go to the game state:
         GotoStateGame();
     } else if (game_data.state == STATE_MENU || game_data.state == STATE_SCORES ||
-        game_data.state == STATE_HELP) {
+        game_data.state == STATE_HELP || game_data.state == STATE_GAME_OVER) {
+        // Set this machine as the player 2:
         PlayerTwoAsHost();
     }
 }
@@ -543,6 +407,7 @@ void StartSignalReceived() {
 //****************************************************************************************************
 
 void GotoStateMenu() {
+    // Change the current state & draw the screen:
     game_data.state = STATE_MENU;
     DrawMenu();
 }
@@ -551,9 +416,12 @@ void GotoStateMenu() {
 
 void GotoStateNewGame() {
     if (game_data.hostPlayer == PLAYER_ONE) {
+        // Change the current state, send the star signal to the player 2 & draw the screen:
         game_data.state = STATE_NEW_GAME;
+        SendStartSignal();
         DrawNewGame();
     } else {
+        // Send the start signal to the player 1 & go to the game state:
         SendStartSignal();
         GotoStateGame();
     }
@@ -562,6 +430,7 @@ void GotoStateNewGame() {
 //----------------------------------------------------------------------------------------------------
 
 void GotoStateGame() {
+    // Change the current state, initialize a new game & draw the screen:
     game_data.state = STATE_GAME;
     InitializeNewGame();
     DrawGame();
@@ -570,16 +439,19 @@ void GotoStateGame() {
 //----------------------------------------------------------------------------------------------------
 
 void GotoStateGameOver() {
-    game_data.state = STATE_GAME_OVER;
+    // Set if there is a victory or not, add the score & reset the host player:
     game_data.victory = game_data.players[game_data.hostPlayer].lives > 0;
     if (game_data.victory) { AddScore(game_data.lastScore); }
     PlayerOneAsHost();
+    // Change the current state & draw the screen:
+    game_data.state = STATE_GAME_OVER;
     DrawGameOver();
 }
 
 //----------------------------------------------------------------------------------------------------
 
 void GotoStateScores() {
+    // Change the current state & draw the screen:
     game_data.state = STATE_SCORES;
     DrawScores();
 }
@@ -587,6 +459,7 @@ void GotoStateScores() {
 //----------------------------------------------------------------------------------------------------
 
 void GotoStateHelp() {
+    // Change the current state & draw the screen:
     game_data.state = STATE_HELP;
     DrawHelp();
 }
@@ -632,393 +505,25 @@ void UpdateOnKeyboard(UINT32 keys) {
 void UpdateOnTimer() {
     //TODO: Complete this function...
     if (game_data.state == STATE_GAME) {
-        UpdateGame();
+        if (game_data.hostPlayer == PLAYER_ONE) {
+            UpdateGame();
+        }
     } else {
         ++game_seed;
     }
-	//...
-}
-
-//****************************************************************************************************
-// Menus
-//****************************************************************************************************
-
-void DrawMenu() {
-    ClearLCD();
-    PutString2LCD(48, 32, LCD_COLOR_BLACK, "TANK COMMANDER"); //14
-    PutStringLCD(116, 96, LCD_COLOR_BLACK, "A) New Game"); //11
-    PutStringLCD(116, 128, LCD_COLOR_BLACK, "B) Scores"); //9
-    PutStringLCD(116, 160, LCD_COLOR_BLACK, "C) Help"); //7
+    //...
 }
 
 //----------------------------------------------------------------------------------------------------
 
-void DrawNewGame() {
-    ClearLCD();
-    PutString2LCD(96, 32, LCD_COLOR_BLACK, "NEW GAME"); //8
-    PutStringLCD(84, 112, LCD_COLOR_BLACK, "Waiting player 2..."); //19
-    PutStringLCD(116, 192, LCD_COLOR_BLACK, "P) Cancel"); //9
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawGameOver() {
-    ClearLCD();
-    if (game_data.victory) {
-        PutString2LCD(96, 32, LCD_COLOR_BLACK, "VICTORY!"); //8
-    } else {
-        PutString2LCD(88, 32, LCD_COLOR_BLACK, "GAME OVER"); //9
-    }
-    char * score = IntToString(game_data.lastScore);
-    UINT16 x = (LCD_WIDTH - (FONT_WIDTH * strlen(score))) / 2;
-    PutStringLCD(64, 96, LCD_COLOR_BLACK, "This is your last score:"); //24
-    PutStringLCD(x, 128, LCD_COLOR_BLACK, score);
-    PutStringLCD(48, 192, LCD_COLOR_BLACK, "Press any key to continue..."); //28
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawScores() {
-    static const UINT8 MAX_LINES = 8;
-    static const char * lines[] = {
-        "1) ----------", //13
-        "2) ----------",
-        "3) ----------",
-        "4) ----------",
-        "5) ----------",
-        "6) ----------",
-        "7) ----------",
-        "8) ----------"
-    };
-    UINT8 i;
-    ClearLCD();
-    PutString2LCD(112, 32, LCD_COLOR_BLACK, "SCORES"); //6
-    for (i = 0; i < MAX_LINES; ++i) {
-        PutStringLCD(108, 80 + FONT_HEIGHT * i, LCD_COLOR_BLACK, lines[i]);
-    }
-    for (i = 0; i < MAX_SCORES; ++i) {
-        if (game_data.scores[i]) {
-            PutStringLCD(132, 80 + i * FONT_HEIGHT, LCD_COLOR_BLACK,
-                IntToString10(game_data.scores[i]));
-        }
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawHelp() {
-    static const UINT8 MAX_LINES = 9;
-    static const char * lines[] = {
-        "|----------|-----------------------|",
-        "| Keyboard | Move with the arrows: |",
-        "|  A B C D |                       |",
-        "|  E F G H |         UP:B          |",
-        "|  I J K L | LEFT:E        RIGHT:G |",
-        "|  M N O P |        DOWN:J         |",
-        "|----------|                       |",
-        "           | Fire with: F          |",
-        "           |-----------------------|"
-    };
-    UINT8 i;
-    ClearLCD();
-    PutString2LCD(128, 32, LCD_COLOR_BLACK, "HELP"); //4
-    for (i = 0; i < MAX_LINES; ++i) {
-        PutStringLCD(16, 80 + FONT_HEIGHT * i, LCD_COLOR_BLACK, lines[i]);
-    }
-}
-
-//****************************************************************************************************
-// Scores
-//****************************************************************************************************
-
-void InitializeScores() {
-    INT8 i;
-    for (i = 0; i < MAX_SCORES; ++i) {
-        game_data.scores[i] = 0;
-    }
-    LoadScores();
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void AddScore(UINT32 score) {
-    INT8 i, j;
-    for (i = 0; i < MAX_SCORES; ++i) {
-        if (score > game_data.scores[i]) {
-            for (j = MAX_SCORES - 1; j > i; --j) {
-                game_data.scores[j] = game_data.scores[j - 1];
-            }
-            game_data.scores[i] = score;
-            break;
-        }
-    }
-    SaveScores();
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void SaveScores() {
+void UpdateOnReceiveUART(unsigned value) {
     //TODO: Complete this function...
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void LoadScores() {
-    //TODO: Complete this function...
-}
-
-//****************************************************************************************************
-// World
-//****************************************************************************************************
-
-void InitializeWorld() {
-    static const UINT8 data[] = {
-        W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL,
-        W_WALL, W_PLA1, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
-        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
-        W_WALL, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_WALL,
-        W_WALL, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_WALL,
-        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_EMPT, W_WALL, W_WALL, W_WALL, W_WALL, W_EMPT, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
-        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
-        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
-        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_EMPT, W_WALL, W_WALL, W_WALL, W_WALL, W_EMPT, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
-        W_WALL, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_WALL,
-        W_WALL, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL, W_WALL, W_EMPT, W_EMPT, W_WALL,
-        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_WALL,
-        W_WALL, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_PLA2, W_WALL,
-        W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL, W_WALL,
-        W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT, W_EMPT
-    };
-    UINT8 i, j;
-    UINT16 k = 0;
-    for (i = 0; i < MAX_ROWS; ++i) {
-        for (j = 0; j < MAX_COLS; ++j, ++k) {
-            game_data.world[i][j] = data[k];
+    if (value == 1) {
+        if (game_data.state == STATE_GAME) {
+            //...
+        } else {
+            //...
         }
     }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-BOOL IsCellEmpty(UINT8 row, UINT8 col) {
-    return game_data.world[row][col] == W_EMPT;
-}
-
-//----------------------------------------------------------------------------------------------------
-
-BOOL IsCellEmptyOrPickable(UINT8 row, UINT8 col) {
-    return game_data.world[row][col] == W_EMPT || game_data.world[row][col] == W_LIFE;
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawWorlCell(UINT8 row, UINT8 col) {
-    UINT8 victim = game_data.world[row][col];
-    switch (victim) {
-    case W_PLA1: DrawWorldPlayer1(row, col);  break;
-    case W_PLA2: DrawWorldPlayer2(row, col);  break;
-    case W_SHO1: DrawWorldShoot(row, col);    break;
-    case W_SHO2: DrawWorldShoot(row, col);    break;
-    case W_SOL1: DrawWorldSoldier1(row, col); break;
-    case W_SOL2: DrawWorldSoldier1(row, col); break;
-    case W_LIFE: DrawWorldLife(row, col);     break;
-    case W_WALL: DrawWorldWall(row, col);     break;
-    default:     DrawWorldEmpty(row, col);    break;
-    }
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawWorldPlayer1(UINT8 row, UINT8 col) {
-    static const UINT8 data[] = {
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_BL, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_BL, CL_LG, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_BL, CL_LG, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_LG, CL_BL, CL_LG, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_BL, CL_LG, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_LG, CL_BL, CL_LG, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_BL, CL_BL, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_BL, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_BL, CL_LG, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH
-    };
-    DrawWorldPlayer(row, col, PLAYER_ONE, data);
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawWorldPlayer2(UINT8 row, UINT8 col) {
-    static const UINT8 data[] = {
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_BL, CL_WH, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH
-    };
-    DrawWorldPlayer(row, col, PLAYER_TWO, data);
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawWorldSoldier1(UINT8 row, UINT8 col) {
-    static const UINT8 data[] = {
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_BL, CL_BL, CL_BL, CL_LG, CL_BL, CL_BL, CL_BL, CL_LG, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_LG, CL_BL, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_BL, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_LG, CL_BL, CL_BL, CL_BL, CL_LG, CL_BL, CL_BL, CL_BL, CL_LG, CL_LG, CL_BL, CL_WH, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_LG, CL_BL, CL_LG, CL_LG, CL_LG, CL_BL, CL_WH, CL_WH,
-        CL_WH, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_WH,
-        CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH
-    };
-    DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawWorldLife(UINT8 row, UINT8 col) {
-    static const UINT8 data[] = {
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_DG, CL_DG, CL_DG, CL_WH, CL_WH, CL_WH, CL_DG, CL_DG, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH,
-        CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH,
-        CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH,
-        CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_DG, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH
-    };
-    DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawWorldWall(UINT8 row, UINT8 col) {
-    static const UINT8 data[] = {
-        CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL,
-        CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG,
-        CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG,
-        CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG,
-        CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG,
-        CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG,
-        CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL, CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG,
-        CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL,
-        CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL,
-        CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL,
-        CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL,
-        CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL,
-        CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL,
-        CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL,
-        CL_BL, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_LG, CL_BL,
-        CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL, CL_BL
-    };
-    DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawWorldEmpty(UINT8 row, UINT8 col) {
-    static const UINT8 data[] = {
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH
-    };
-    DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-}
-
-//----------------------------------------------------------------------------------------------------
-
-void DrawWorldShoot(UINT8 row, UINT8 col) {
-    static const UINT8 data[] = {
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_BL, CL_BL, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH,
-        CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH, CL_WH
-    };
-    DrawGameSprite(col * CELL_WIDTH, row * CELL_HEIGHT, data);
-}
-
-//****************************************************************************************************
-// Utility
-//****************************************************************************************************
-
-char * IntToString(UINT32 value) {
-	return IntToStringWithFormat(value, "%d");
-}
-
-//----------------------------------------------------------------------------------------------------
-
-char * IntToString3(UINT32 value) {
-	return IntToStringWithFormat(value, "%3d");
-}
-
-//----------------------------------------------------------------------------------------------------
-
-char * IntToString10(UINT32 value) {
-	return IntToStringWithFormat(value, "%10d");
-}
-
-//----------------------------------------------------------------------------------------------------
-
-char * IntToStringWithFormat(UINT32 value, const char * format) {
-    static char buffer[16];
-    sprintf(buffer, format, value);
-    return buffer;
+    //...
 }
