@@ -51,7 +51,9 @@ void GotoStateNewGame() {
         DrawNewGame();
     } else {
         // Send the start signal to the player 1 & go to the game state:
+        game_data.useCommunication = FALSE;
         SendNewGameMessage();
+        game_data.useCommunication = TRUE;
         GotoStateGame();
     }
 }

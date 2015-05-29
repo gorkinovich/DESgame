@@ -61,6 +61,7 @@ void InitializeNewGame() {
     game_data.lastScore = 0;
     game_data.victory = FALSE;
     game_data.useInput = TRUE;
+    game_data.useCommunication = TRUE;
     game_data.updateCount = 0;
     srand(game_seed);
 }
@@ -295,6 +296,7 @@ char ReceiveByte() {
 //----------------------------------------------------------------------------------------------------
 
 void StartUpdateCommunication() {
+    WaitTxEmptyUART1();
     SendByte(MSG_UPDATE);
     SendByteUART1(game_data.lastAction);
     game_data.remoteAction = GetCharUART1();
@@ -312,18 +314,21 @@ void FinishUpdateCommunication() {
 //----------------------------------------------------------------------------------------------------
 
 BOOL SendNewGameMessage() {
+    WaitTxEmptyUART1();
     return SendByte(MSG_NEW_GAME);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 BOOL SendAbortMessage() {
+    WaitTxEmptyUART1();
     return SendByte(MSG_ABORT);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 BOOL SendTestMessage() {
+    WaitTxEmptyUART1();
     return SendByte(MSG_TEST);
 }
 
@@ -343,6 +348,7 @@ void NewGameMessageReceived() {
 //----------------------------------------------------------------------------------------------------
 
 void UpdateOnReceiveUART() {
+    if (!game_data.useCommunication) return;
     char value = 0;
     if (game_data.hostPlayer == PLAYER_TWO) {
         // Get the head of the message:
