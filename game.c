@@ -195,8 +195,10 @@ void UpdateEntityGenerator() {
 //----------------------------------------------------------------------------------------------------
 
 void UpdateGame() {
+    if (game_data.state != STATE_GAME) return;
     UpdatePlayerShoot(PLAYER_ONE);
     UpdatePlayerShoot(PLAYER_TWO);
+    if (game_data.state != STATE_GAME) return;
     if (game_data.updateCount >= MAX_UPDATE_COUNT) {
         game_data.updateCount = 0;
         ExecuteAction(game_data.hostPlayer, game_data.lastAction);
