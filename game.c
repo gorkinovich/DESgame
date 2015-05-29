@@ -343,23 +343,28 @@ void NewGameMessageReceived() {
 //----------------------------------------------------------------------------------------------------
 
 void UpdateOnReceiveUART() {
-    // Get the head of the message:
-    char value = ReceiveByte();
+    char value = 0;
     // Check the state of the game:
     if (game_data.state == STATE_NEW_GAME) {
         // Check the type of the message & the player:
-        if (game_data.hostPlayer == PLAYER_TWO && value == MSG_UPDATE) {
-            game_data.useInput = FALSE;
-            game_data.remoteAction = GetCharUART1();
-            SendByteUART1(game_data.lastAction);
-            game_data.updateCount = ReceiveByte();
-            game_data.lastGenRow = ReceiveByte();
-            game_data.lastGenCol = ReceiveByte();
-            game_data.lastGenVal = ReceiveByte();
-            UpdateGame();
-            game_data.useInput = TRUE;
+        if (game_data.hostPlayer == PLAYER_TWO) {
+            // Get the head of the message:
+            value = ReceiveByte();
+            if (value == MSG_UPDATE) {
+                game_data.useInput = FALSE;
+                game_data.remoteAction = GetCharUART1();
+                SendByteUART1(game_data.lastAction);
+                game_data.updateCount = ReceiveByte();
+                game_data.lastGenRow = ReceiveByte();
+                game_data.lastGenCol = ReceiveByte();
+                game_data.lastGenVal = ReceiveByte();
+                UpdateGame();
+                game_data.useInput = TRUE;
+            }
         }
     } else {
+        // Get the head of the message:
+        value = ReceiveByte();
         // Check the type of the message:
         switch (value) {
         case MSG_NEW_GAME:
