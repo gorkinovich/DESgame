@@ -344,12 +344,12 @@ void NewGameMessageReceived() {
 
 void UpdateOnReceiveUART() {
     char value = 0;
-    // Check the state of the game:
-    if (game_data.state == STATE_NEW_GAME) {
-        // Check the type of the message & the player:
-        if (game_data.hostPlayer == PLAYER_TWO) {
-            // Get the head of the message:
-            value = ReceiveByte();
+    if (game_data.hostPlayer == PLAYER_TWO) {
+        // Get the head of the message:
+        value = ReceiveByte();
+        // Check the state of the game:
+        if (game_data.state == STATE_NEW_GAME) {
+            // Check the type of the message:
             if (value == MSG_UPDATE) {
                 game_data.useInput = FALSE;
                 game_data.remoteAction = GetCharUART1();
@@ -361,25 +361,45 @@ void UpdateOnReceiveUART() {
                 UpdateGame();
                 game_data.useInput = TRUE;
             }
-        }
-    } else {
-        // Get the head of the message:
-        value = ReceiveByte();
-        // Check the type of the message:
-        switch (value) {
-        case MSG_NEW_GAME:
-            NewGameMessageReceived();
-            break;
-        case MSG_ABORT:
-            InitializeGame();
-            break;
-        case MSG_TEST:
-            if (IsPoint8Led()) {
-                ClearPoint8Led();
-            } else {
-                SetPoint8Led();
+        } else {
+            // Check the type of the message:
+            switch (value) {
+            case MSG_NEW_GAME:
+                NewGameMessageReceived();
+                break;
+            case MSG_ABORT:
+                InitializeGame();
+                break;
+            case MSG_TEST:
+                if (IsPoint8Led()) {
+                    ClearPoint8Led();
+                } else {
+                    SetPoint8Led();
+                }
+                break;
             }
-            break;
+        }
+    } else if (game_data.hostPlayer == PLAYER_ONE) {
+        // Check the state of the game:
+        if (game_data.state != STATE_NEW_GAME) {
+            // Get the head of the message:
+            value = ReceiveByte();
+            // Check the type of the message:
+            switch (value) {
+            case MSG_NEW_GAME:
+                NewGameMessageReceived();
+                break;
+            case MSG_ABORT:
+                InitializeGame();
+                break;
+            case MSG_TEST:
+                if (IsPoint8Led()) {
+                    ClearPoint8Led();
+                } else {
+                    SetPoint8Led();
+                }
+                break;
+            }
         }
     }
 }
