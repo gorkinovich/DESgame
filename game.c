@@ -116,6 +116,7 @@ void PlayerQuitOneLife(UINT8 player) {
             DrawGameScoreAndLives();
         }
     } else {
+        game_data.players[player].lives = 0;
         GotoStateGameOver();
     }
 }
