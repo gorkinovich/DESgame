@@ -347,6 +347,27 @@ void NewGameMessageReceived() {
 
 //----------------------------------------------------------------------------------------------------
 
+static void GenericUpdateOnReceiveUART(char value) {
+    // Check the type of the message:
+    switch (value) {
+    case MSG_NEW_GAME:
+        NewGameMessageReceived();
+        break;
+    case MSG_ABORT:
+        InitializeGame();
+        break;
+    case MSG_TEST:
+        if (IsPoint8Led()) {
+            ClearPoint8Led();
+        } else {
+            SetPoint8Led();
+        }
+        break;
+    }
+}
+
+//----------------------------------------------------------------------------------------------------
+
 void UpdateOnReceiveUART() {
     if (!game_data.useCommunication) return;
     char value = 0;
@@ -354,7 +375,7 @@ void UpdateOnReceiveUART() {
         // Get the head of the message:
         value = ReceiveByte();
         // Check the state of the game:
-        if (game_data.state == STATE_NEW_GAME) {
+        if (game_data.state == STATE_GAME) {
             // Check the type of the message:
             if (value == MSG_UPDATE) {
                 game_data.useInput = FALSE;
@@ -369,43 +390,15 @@ void UpdateOnReceiveUART() {
             }
         } else {
             // Check the type of the message:
-            switch (value) {
-            case MSG_NEW_GAME:
-                NewGameMessageReceived();
-                break;
-            case MSG_ABORT:
-                InitializeGame();
-                break;
-            case MSG_TEST:
-                if (IsPoint8Led()) {
-                    ClearPoint8Led();
-                } else {
-                    SetPoint8Led();
-                }
-                break;
-            }
+            GenericUpdateOnReceiveUART(value);
         }
     } else if (game_data.hostPlayer == PLAYER_ONE) {
         // Check the state of the game:
-        if (game_data.state != STATE_NEW_GAME) {
+        if (game_data.state != STATE_GAME) {
             // Get the head of the message:
             value = ReceiveByte();
             // Check the type of the message:
-            switch (value) {
-            case MSG_NEW_GAME:
-                NewGameMessageReceived();
-                break;
-            case MSG_ABORT:
-                InitializeGame();
-                break;
-            case MSG_TEST:
-                if (IsPoint8Led()) {
-                    ClearPoint8Led();
-                } else {
-                    SetPoint8Led();
-                }
-                break;
-            }
+            GenericUpdateOnReceiveUART(value);
         }
     }
 }
